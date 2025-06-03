@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ruleta Opera Maritim (SVG + Email + Ajustes)</title>
+  <title>Ruleta Opera Maritim (SVG + Email + Oro Unificado)</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --oro-plano: #d4af37; /* Color plano de oro para casos puntuales */
+      --oro-start: #fff9c4; /* centro claro del degradado */
+      --oro-mid:   #f1c232; /* tono medio */
+      --oro-end:   #f9e285; /* borde suave */
       --negro: #111;
       --blanco: #f8f8f8;
     }
@@ -32,10 +34,14 @@
       margin: 20px 0;
     }
     h1 {
-      /* Título con degradado dorado (lineal) */
+      /* Título con el mismo degradado lineal que usa la rueda */
       font-family: 'Playfair Display', serif;
       margin-bottom: 30px;
-      background: linear-gradient(145deg, #f9e285 0%, #c7a238 50%, #f9e285 100%);
+      background: linear-gradient(180deg,
+        var(--oro-start) 0%,
+        var(--oro-mid)   60%,
+        var(--oro-end)  100%
+      );
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -48,7 +54,7 @@
       width: 80%;
       padding: 12px;
       margin: 15px 0;
-      border: 2px solid var(--oro-plano);
+      border: 2px solid var(--oro-mid);
       border-radius: 4px;
       background: rgba(0,0,0,0.2);
       color: white;
@@ -76,14 +82,22 @@
       transform: translateX(-50%);
       width: 30px;
       height: 30px;
-      /* Puntero invertido: punta hacia abajo */
-      background: linear-gradient(145deg, #f9e285 0%, #c7a238 50%, #f9e285 100%);
+      /* Puntero con el mismo degradado lineal */
+      background: linear-gradient(180deg,
+        var(--oro-start) 0%,
+        var(--oro-mid)   60%,
+        var(--oro-end)  100%
+      );
       clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
       z-index: 2;
     }
     .spin-btn {
-      /* Botón con degradado lineal dorado */
-      background: linear-gradient(145deg, #f9e285 0%, #c7a238 50%, #f9e285 100%);
+      /* Botón con el mismo degradado lineal */
+      background: linear-gradient(180deg,
+        var(--oro-start) 0%,
+        var(--oro-mid)   60%,
+        var(--oro-end)  100%
+      );
       color: var(--negro);
       border: none;
       padding: 15px 40px;
@@ -95,8 +109,12 @@
       margin-top: 20px;
     }
     .spin-btn:hover {
-      /* Sutil cambio al pasar el cursor */
-      background: linear-gradient(145deg, #ffd666 0%, #d4af37 50%, #ffd666 100%);
+      /* Ligera variación manteniendo la misma tonalidad */
+      background: linear-gradient(180deg,
+        var(--oro-mid)   0%,
+        var(--oro-end)   60%,
+        var(--oro-mid)  100%
+      );
     }
     .disclaimer {
       font-size: 12px;
@@ -235,7 +253,7 @@
         wheelGroup.appendChild(sectorPath);
 
         // Calcular ángulo medio para colocar el texto
-        const midAngle = startAngle + anglePerSegment / 2; // e.g. 30, 90, 150, ...
+        const midAngle = startAngle + anglePerSegment / 2;
         const midRad   = toRad(midAngle);
         const textRadius = radius - 60; // alejamos el texto del borde exterior
 
@@ -287,8 +305,7 @@
       const winnerIndex = Math.floor(Math.random() * totalSegments);
       const centerOfWinner = winnerIndex * anglePerSegment + anglePerSegment / 2;
 
-      // Añadimos 3 vueltas completas (3 * 360°) y compensamos con +90° 
-      // para que la flecha (apuntando hacia abajo) coincida con el sector
+      // Añadimos 3 vueltas completas (3 * 360°) y compensamos con +90°
       const extraSpins = 3 * 360;
       const targetRotation = extraSpins + centerOfWinner + 90;
 
@@ -327,4 +344,3 @@
   </script>
 </body>
 </html>
-
