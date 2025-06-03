@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruleta Opera Maritim</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #111;
+      color: #f8f8f8;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .logo {
+      width: 180px;
+      margin: 20px 0;
+    }
+    .wheel-container {
+      margin: 30px auto;
+      position: relative;
+    }
+    .wheel {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: conic-gradient(
+        #caa86f 0% 25%,
+        #111 25% 50%,
+        #caa86f 50% 75%,
+        #111 75% 100%
+      );
+      position: relative;
+      margin: 0 auto;
+    }
+    .spin-btn {
+      background-color: #caa86f;
+      color: #111;
+      border: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="https://operamaritim.com/wp-content/uploads/2025/01/logotipo-opera-maritim-blanco.png" alt="Opera Maritim" class="logo">
+    <h1 style="color: #caa86f;">¡Gira la ruleta y gana!</h1>
+    <div class="wheel-container">
+      <div class="wheel" id="wheel"></div>
+    </div>
+    <button class="spin-btn" onclick="spinWheel()">GIRAR</button>
+  </div>
+
+  <script>
+    const prizes = ["Postre gratis", "2x1 en cócteles", "Descuento 20%"];
+    
+    function spinWheel() {
+      const wheel = document.getElementById('wheel');
+      const winnerIndex = Math.floor(Math.random() * prizes.length);
+      const degrees = 1080 + (winnerIndex * 120); // 1080° = 3 vueltas
+      
+      wheel.style.transform = `rotate(${degrees}deg)`;
+      wheel.style.transition = 'transform 3s ease-out';
+      
+      setTimeout(() => {
+        alert(`¡Ganaste: ${prizes[winnerIndex]}!`);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
