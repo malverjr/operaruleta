@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ruleta Opera Maritim (SVG + Email + Oro Realista)</title>
+  <title>Ruleta Opera Maritim (SVG + Email + Oro Realista sin sombreado interno)</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Mantenemos la variable para casos en que necesitemos un color plano de oro */
+      /* Color plano de oro (sin sombras internas) */
       --oro: #d4af37;
       --negro: #111;
       --blanco: #f8f8f8;
@@ -33,7 +33,7 @@
       margin: 20px 0;
     }
     h1 {
-      /* Texto con degradado que simula oro realista */
+      /* Seguimos usando degradado para el título */
       font-family: 'Playfair Display', serif;
       margin-bottom: 30px;
       background: linear-gradient(145deg, #f9e285 0%, #c7a238 50%, #f9e285 100%);
@@ -77,7 +77,7 @@
       transform: translateX(-50%);
       width: 30px;
       height: 30px;
-      /* Degradado dorado para el puntero */
+      /* Degradado dorado para el puntero (mantener reflejo metálico) */
       background: linear-gradient(145deg, #f9e285 0%, #c7a238 50%, #f9e285 100%);
       clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
       z-index: 2;
@@ -127,7 +127,7 @@
         <!-- SVG para la ruleta con definiciones de degradado -->
         <svg id="wheelSvg" viewBox="0 0 320 320">
           <defs>
-            <!-- Degradado dorado radial (más realista) -->
+            <!-- Degradado radial usado sólo para el borde exterior -->
             <radialGradient id="goldGrad" cx="50%" cy="50%" r="75%" fx="50%" fy="50%">
               <stop offset="0%"   stop-color="#fff9c4" />
               <stop offset="40%"  stop-color="#f1c232" />
@@ -135,7 +135,6 @@
               <stop offset="100%" stop-color="#f1c232" />
             </radialGradient>
           </defs>
-          <!-- Los <path> y <text> se generarán con JavaScript dentro de este <svg> -->
         </svg>
       </div>
       <button class="spin-btn" id="spinBtn">GIRAR</button>
@@ -152,11 +151,12 @@
     ////////////////////////////////////////////////
 
     const prizes = [
-      { text: "POSTRE GRATIS",     bgColor: "goldGrad", textColor: "#111" },
+      // Para los sectores dorados, indicamos "flatGold"; para los negros, "#111"
+      { text: "POSTRE GRATIS",     bgColor: "flatGold", textColor: "#111" },
       { text: "10% DESCUENTO",     bgColor: "#111",     textColor: "#f8f8f8" },
-      { text: "CAFÉ GRATIS",       bgColor: "goldGrad", textColor: "#111" },
+      { text: "CAFÉ GRATIS",       bgColor: "flatGold", textColor: "#111" },
       { text: "5% DESCUENTO",      bgColor: "#111",     textColor: "#f8f8f8" },
-      { text: "BEBIDA GRATIS",     bgColor: "goldGrad", textColor: "#111" },
+      { text: "BEBIDA GRATIS",     bgColor: "flatGold", textColor: "#111" },
       { text: "15% DESCUENTO",     bgColor: "#111",     textColor: "#f8f8f8" }
     ];
 
@@ -191,7 +191,7 @@
         wheelGroup.removeChild(wheelGroup.firstChild);
       }
 
-      // 3.1) DIBUJAR EL BORDE EXTERIOR DORADO USANDO EL DEGRADADO
+      // 3.1) DIBUJAR EL BORDE EXTERIOR DORADO (usando gradient)
       const borderCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       borderCircle.setAttribute("cx", cx);
       borderCircle.setAttribute("cy", cy);
@@ -225,12 +225,13 @@
         const sectorPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
         sectorPath.setAttribute("d", pathData);
 
-        // Si bgColor es "goldGrad", usamos el degradado; en caso contrario, el color plano
-        if (prize.bgColor === "goldGrad") {
-          sectorPath.setAttribute("fill", "url(#goldGrad)");
+        // Si es sector dorado, usamos color plano var(--oro); si es negro, "#111"
+        if (prize.bgColor === "flatGold") {
+          sectorPath.setAttribute("fill", "var(--oro)");
         } else {
           sectorPath.setAttribute("fill", prize.bgColor);
         }
+        // El borde del sector (línea fina) se mantiene en degradado
         sectorPath.setAttribute("stroke", "url(#goldGrad)");
         sectorPath.setAttribute("stroke-width", "1");
         wheelGroup.appendChild(sectorPath);
@@ -250,7 +251,7 @@
         svgText.setAttribute("y", textY);
         svgText.setAttribute("fill", prize.textColor);
         svgText.setAttribute("font-family", "Montserrat, sans-serif");
-        svgText.setAttribute("font-size", "10");        // Tamaño pequeño para caber bien
+        svgText.setAttribute("font-size", "10");        // Tamaño pequeño para encajar
         svgText.setAttribute("font-weight", "600");
         svgText.setAttribute("text-anchor", "middle");
         svgText.setAttribute("alignment-baseline", "middle");
@@ -327,3 +328,4 @@
   </script>
 </body>
 </html>
+
