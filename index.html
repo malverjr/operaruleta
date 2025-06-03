@@ -27,7 +27,7 @@
       background-size: cover;
     }
     .container {
-      max-width: 600px;
+      max-width: 500px;
       width: 90%;
       padding: 30px;
       box-sizing: border-box;
@@ -46,13 +46,13 @@
       font-family: 'Playfair Display', serif;
       font-size: 24px;
       letter-spacing: 2px;
-      margin: 10px 0;
+      margin: 10px 0 30px;
     }
     .wheel-container {
-      margin: 30px auto;
+      margin: 0 auto 30px;
       position: relative;
-      width: 280px;
-      height: 280px;
+      width: 300px;
+      height: 300px;
     }
     .wheel {
       width: 100%;
@@ -63,7 +63,7 @@
       box-shadow: 0 0 0 8px var(--oro), 0 0 30px rgba(202, 168, 111, 0.6);
       transition: transform 4s cubic-bezier(0.17, 0.67, 0.21, 0.99);
     }
-    .wheel-item {
+    .wheel-segment {
       position: absolute;
       width: 50%;
       height: 50%;
@@ -76,11 +76,14 @@
       font-weight: 600;
       font-size: 14px;
       text-align: center;
-      padding-right: 60px; /* Más espacio para texto */
       box-sizing: border-box;
-      transform: rotate(30deg) skewY(-30deg);
       text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
-      line-height: 1.3; /* Mejor espaciado */
+      padding-right: 80px;
+    }
+    .wheel-text {
+      transform: rotate(90deg) translateX(50px);
+      width: 100px;
+      text-align: center;
     }
     .spin-btn {
       background-color: var(--oro);
@@ -127,6 +130,14 @@
       margin-top: 20px;
       font-style: italic;
     }
+    .form-section {
+      margin-bottom: 25px;
+    }
+    .form-title {
+      color: var(--oro);
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
   </style>
 </head>
 <body>
@@ -135,8 +146,12 @@
     <h1 class="title">¡Gira y descubre tu premio!</h1>
     
     <div id="emailSection" style="display: block;">
-      <p>Introduce tu email para participar:</p>
-      <input type="email" id="userEmail" class="email-input" placeholder="tucorreo@ejemplo.com">
+      <div class="form-section">
+        <div class="form-title">Regístrate para participar</div>
+        <input type="text" id="userFirstName" class="email-input" placeholder="Nombre" style="margin-bottom: 10px;">
+        <input type="text" id="userLastName" class="email-input" placeholder="Apellido" style="margin-bottom: 10px;">
+        <input type="email" id="userEmail" class="email-input" placeholder="Correo electrónico">
+      </div>
       <button class="spin-btn" onclick="verifyEmail()">CONTINUAR</button>
     </div>
     
@@ -159,45 +174,60 @@
     
     // Premios con mejor espaciado
     const prizes = [
-      { text: "Postre gratis", color: "#caa86f", textColor: "#111" },
-      { text: "10% descuento", color: "#111", textColor: "#f8f8f8" },
-      { text: "Café gratis", color: "#caa86f", textColor: "#111" },
-      { text: "5% descuento", color: "#111", textColor: "#f8f8f8" },
-      { text: "Bebida gratis", color: "#caa86f", textColor: "#111" },
-      { text: "15% descuento", color: "#111", textColor: "#f8f8f8" }
+      { text: "POSTRE GRATIS", color: "#caa86f", textColor: "#111" },
+      { text: "10% DESCUENTO", color: "#111", textColor: "#f8f8f8" },
+      { text: "CAFÉ GRATIS", color: "#caa86f", textColor: "#111" },
+      { text: "5% DESCUENTO", color: "#111", textColor: "#f8f8f8" },
+      { text: "BEBIDA GRATIS", color: "#caa86f", textColor: "#111" },
+      { text: "15% DESCUENTO", color: "#111", textColor: "#f8f8f8" }
     ];
 
     // Variables globales
     const wheel = document.getElementById('wheel');
     const spinBtn = document.getElementById('spinBtn');
     let userEmail = "";
+    let userFirstName = "";
+    let userLastName = "";
 
     // Verificar email
     function verifyEmail() {
       const emailInput = document.getElementById('userEmail').value;
+      userFirstName = document.getElementById('userFirstName').value;
+      userLastName = document.getElementById('userLastName').value;
+      
       if (!emailInput.includes("@") || !emailInput.includes(".")) {
         alert("Por favor, introduce un email válido");
         return;
       }
+      if (!userFirstName || !userLastName) {
+        alert("Por favor, completa todos los campos");
+        return;
+      }
+      
       userEmail = emailInput;
       document.getElementById('emailSection').style.display = "none";
       document.getElementById('wheelSection').style.display = "block";
       initWheel();
     }
 
-    // Crear ruleta visual (CORREGIDO)
+    // Crear ruleta visual con mejor alineación
     function initWheel() {
-      wheel.innerHTML = ""; // Limpiar antes de crear
+      wheel.innerHTML = "";
       prizes.forEach((prize, index) => {
-        const slice = document.createElement('div');
-        slice.className = 'wheel-item';
-        slice.textContent = prize.text.toUpperCase(); // Texto en mayúsculas
-        slice.style.backgroundColor = prize.color;
-        slice.style.color = prize.textColor;
-        slice.style.transform = `rotate(${index * 60}deg) skewY(-30deg)`;
-        slice.style.fontSize = "12px"; // Tamaño fijo
-        slice.style.paddingRight = "70px"; // Más margen
-        wheel.appendChild(slice);
+        const segment = document.createElement('div');
+        segment.className = 'wheel-segment';
+        segment.style.backgroundColor = prize.color;
+        segment.style.transform = `rotate(${index * 60}deg) skewY(-30deg)`;
+        
+        const text = document.createElement('div');
+        text.className = 'wheel-text';
+        text.textContent = prize.text;
+        text.style.color = prize.textColor;
+        text.style.fontSize = "12px";
+        text.style.transform = "rotate(90deg) translateX(50px)";
+        
+        segment.appendChild(text);
+        wheel.appendChild(segment);
       });
     }
 
@@ -223,13 +253,15 @@
 
       emailjs.send('service_t4py4c5', 'template_sby6x8j', {
         to_email: userEmail,
+        first_name: userFirstName,
+        last_name: userLastName,
         premio: premio,
         codigo: codigo,
         fecha: fechaValidez.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
       }).then(() => {
-        alert(`¡Felicidades!\nGanaste: ${premio}\nRevisa tu email para obtener tu código.`);
+        alert(`¡Felicidades ${userFirstName}!\nGanaste: ${premio}\nRevisa tu email para obtener tu código.`);
       }, (error) => {
-        alert(`¡Felicidades!\nGanaste: ${premio}\nCódigo: ${codigo}\n(valido hasta ${fechaValidez.toLocaleDateString()})`);
+        alert(`¡Felicidades ${userFirstName}!\nGanaste: ${premio}\nCódigo: ${codigo}\n(valido hasta ${fechaValidez.toLocaleDateString()})`);
       });
     }
 
