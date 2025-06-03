@@ -37,22 +37,16 @@
       box-shadow: 0 0 30px rgba(202, 168, 111, 0.3);
       border: 1px solid var(--oro);
     }
-    .logo-container {
-      display: flex;
-      justify-content: center;
+    .logo {
+      width: 180px;
       margin-bottom: 20px;
     }
-    .logo-text {
-      font-family: 'Playfair Display', serif;
+    .title {
       color: var(--oro);
-      font-size: 28px;
-      letter-spacing: 5px;
-      text-align: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      letter-spacing: 2px;
       margin: 10px 0;
-    }
-    .logo-text span {
-      display: block;
-      font-size: 34px;
     }
     .wheel-container {
       margin: 30px auto;
@@ -80,12 +74,13 @@
       align-items: center;
       justify-content: center;
       font-weight: 600;
-      font-size: 12px;
+      font-size: 14px;
       text-align: center;
-      padding-right: 50px;
+      padding-right: 60px; /* Más espacio para texto */
       box-sizing: border-box;
       transform: rotate(30deg) skewY(-30deg);
       text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+      line-height: 1.3; /* Mejor espaciado */
     }
     .spin-btn {
       background-color: var(--oro);
@@ -136,13 +131,8 @@
 </head>
 <body>
   <div class="container" id="appContainer">
-    <div class="logo-container">
-      <div class="logo-text">
-        <span>OPERA</span>
-        MARITIM
-      </div>
-    </div>
-    <h1 style="color: var(--oro); font-family: 'Playfair Display', serif; letter-spacing: 2px;">¡Gira y descubre tu premio!</h1>
+    <img src="https://operamaritim.com/wp-content/uploads/2025/01/logotipo-opera-maritim-blanco.png" alt="Opera Maritim" class="logo">
+    <h1 class="title">¡Gira y descubre tu premio!</h1>
     
     <div id="emailSection" style="display: block;">
       <p>Introduce tu email para participar:</p>
@@ -164,10 +154,10 @@
   </div>
 
   <script>
-    // Configuración de EmailJS (TUS DATOS)
-    emailjs.init('4KSxHkuk_apCg_kyS'); // Tu Public Key
+    // Configuración de EmailJS
+    emailjs.init('4KSxHkuk_apCg_kyS');
     
-    // Premios personalizados
+    // Premios con mejor espaciado
     const prizes = [
       { text: "Postre gratis", color: "#caa86f", textColor: "#111" },
       { text: "10% descuento", color: "#111", textColor: "#f8f8f8" },
@@ -195,15 +185,18 @@
       initWheel();
     }
 
-    // Crear ruleta visual
+    // Crear ruleta visual (CORREGIDO)
     function initWheel() {
+      wheel.innerHTML = ""; // Limpiar antes de crear
       prizes.forEach((prize, index) => {
         const slice = document.createElement('div');
         slice.className = 'wheel-item';
-        slice.textContent = prize.text;
+        slice.textContent = prize.text.toUpperCase(); // Texto en mayúsculas
         slice.style.backgroundColor = prize.color;
         slice.style.color = prize.textColor;
         slice.style.transform = `rotate(${index * 60}deg) skewY(-30deg)`;
+        slice.style.fontSize = "12px"; // Tamaño fijo
+        slice.style.paddingRight = "70px"; // Más margen
         wheel.appendChild(slice);
       });
     }
@@ -212,7 +205,7 @@
     function spinWheel() {
       spinBtn.disabled = true;
       const winnerIndex = Math.floor(Math.random() * prizes.length);
-      const degrees = 1800 + (winnerIndex * 60); // 5 vueltas + ajuste
+      const degrees = 1800 + (winnerIndex * 60);
       
       wheel.style.transform = `rotate(${degrees}deg)`;
       
@@ -222,11 +215,11 @@
       }, 4000);
     }
 
-    // Función para enviar email con premio
+    // Función para enviar email
     function sendPrizeEmail(premio) {
       const codigo = generarCodigo();
       const fechaValidez = new Date();
-      fechaValidez.setDate(fechaValidez.getDate() + 30); // 30 días de validez
+      fechaValidez.setDate(fechaValidez.getDate() + 30);
 
       emailjs.send('service_t4py4c5', 'template_sby6x8j', {
         to_email: userEmail,
@@ -237,7 +230,6 @@
         alert(`¡Felicidades!\nGanaste: ${premio}\nRevisa tu email para obtener tu código.`);
       }, (error) => {
         alert(`¡Felicidades!\nGanaste: ${premio}\nCódigo: ${codigo}\n(valido hasta ${fechaValidez.toLocaleDateString()})`);
-        console.error('Error al enviar email:', error);
       });
     }
 
