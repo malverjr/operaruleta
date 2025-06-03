@@ -69,16 +69,21 @@
       transform-origin: 0 0;
       display: flex;
       align-items: center;
-      padding-left: 40px;
+      /* Aumentamos padding-left para separar el texto del vértice */ 
+      padding-left: 60px;  /* ←– aquí: antes era 40px */
       box-sizing: border-box;
     }
     .segment-text {
       font-weight: 600;
-      font-size: 14px;
+      /* Un poco más grande para mejor legibilidad */
+      font-size: 16px; /* ←– aquí: antes era 14px */
       text-align: center;
-      width: 80px;
-      transform: rotate(90deg) translateX(40px);
+      /* Ancho aumentado un poco para que quepa mejor el texto */
+      width: 100px;   /* ←– aquí: antes era 80px */
+      /* Ajustamos el translateX para compensar el padding extra */
+      transform: rotate(90deg) translateX(60px);  /* ←– aquí: antes era translateX(40px) */
       line-height: 1.2;
+      color: inherit; /* hereda el color que se le asigne en JS */
     }
     .pointer {
       position: absolute;
@@ -173,16 +178,18 @@
         const segment = document.createElement('div');
         segment.className = 'wheel-segment';
         segment.style.backgroundColor = prize.color;
-        segment.style.transform = `rotate(${index * 60}deg) skewY(-30deg)`;
-        
+        /* Lo único que cambiamos aquí: añadimos un offset de 30 grados
+           para que cada sector se centre correctamente y estén simétricos */
+        segment.style.transform = `rotate(${index * 60 + 30}deg) skewY(-30deg)`;  /* ←– aquí */
+
         const content = document.createElement('div');
         content.className = 'segment-content';
-        
+
         const text = document.createElement('div');
         text.className = 'segment-text';
         text.textContent = prize.text;
         text.style.color = prize.textColor;
-        
+
         content.appendChild(text);
         segment.appendChild(content);
         wheel.appendChild(segment);
