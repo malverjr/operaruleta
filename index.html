@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ruleta Opera Maritim (SVG + Email + Oro Unificado)</title>
+  <title>Ruleta Opera Maritim (SVG + Email + Oro Realista)</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --oro-start: #fff9c4; /* centro claro del degradado */
-      --oro-mid:   #f1c232; /* tono medio */
-      --oro-end:   #f9e285; /* borde suave */
+      /* Degradado realista para el oro */
+      --oro-1: #f8e9a1; /* punto más claro */
+      --oro-2: #f1d360; /* intermedio suave */
+      --oro-3: #d4af37; /* tono medio auténtico */
+      --oro-4: #8c6b1c; /* sombra profunda */
       --negro: #111;
       --blanco: #f8f8f8;
     }
@@ -34,13 +36,13 @@
       margin: 20px 0;
     }
     h1 {
-      /* Título con el mismo degradado lineal que usa la rueda */
+      /* Título con degradado dorado existente (se conserva) */
       font-family: 'Playfair Display', serif;
       margin-bottom: 30px;
       background: linear-gradient(180deg,
-        var(--oro-start) 0%,
-        var(--oro-mid)   50%,
-        var(--oro-end)  100%
+        var(--oro-1) 0%,
+        var(--oro-2) 50%,
+        var(--oro-1) 100%
       );
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -54,7 +56,7 @@
       width: 80%;
       padding: 12px;
       margin: 15px 0;
-      border: 2px solid var(--oro-mid);
+      border: 2px solid var(--oro-3);
       border-radius: 4px;
       background: rgba(0,0,0,0.2);
       color: white;
@@ -82,21 +84,23 @@
       transform: translateX(-50%);
       width: 30px;
       height: 30px;
-      /* Puntero con el mismo degradado lineal */
+      /* Puntero con degradado realista */
       background: linear-gradient(180deg,
-        var(--oro-start) 0%,
-        var(--oro-mid)   50%,
-        var(--oro-end)  100%
+        var(--oro-1) 0%,
+        var(--oro-2) 30%,
+        var(--oro-3) 60%,
+        var(--oro-4) 100%
       );
       clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
       z-index: 2;
     }
     .spin-btn {
-      /* Botón con el mismo degradado lineal */
+      /* Botón con degradado realista */
       background: linear-gradient(180deg,
-        var(--oro-start) 0%,
-        var(--oro-mid)   50%,
-        var(--oro-end)  100%
+        var(--oro-1) 0%,
+        var(--oro-2) 30%,
+        var(--oro-3) 60%,
+        var(--oro-4) 100%
       );
       color: var(--negro);
       border: none;
@@ -109,11 +113,11 @@
       margin-top: 20px;
     }
     .spin-btn:hover {
-      /* Ligera variación manteniendo la misma tonalidad */
+      /* Variación sutil del degradado al pasar el cursor */
       background: linear-gradient(180deg,
-        var(--oro-mid)   0%,
-        var(--oro-end)   50%,
-        var(--oro-mid)  100%
+        var(--oro-2) 0%,
+        var(--oro-3) 50%,
+        var(--oro-2) 100%
       );
     }
     .disclaimer {
@@ -141,14 +145,15 @@
     <div id="wheelSection">
       <div class="wheel-container">
         <div class="pointer"></div>
-        <!-- SVG para la ruleta con definiciones de degradado lineal -->
+        <!-- SVG para la ruleta con degradado realista -->
         <svg id="wheelSvg" viewBox="0 0 320 320">
           <defs>
-            <!-- Degradado lineal suave para los sectores dorados -->
-            <linearGradient id="softGoldLinear" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%"   stop-color="#fff9c4" />  <!-- parte superior clara -->
-              <stop offset="50%"  stop-color="#f1c232" />  <!-- mitad más cálida -->
-              <stop offset="100%" stop-color="#f9e285" />  <!-- parte inferior dorada -->
+            <!-- Degradado lineal realista para los sectores dorados -->
+            <linearGradient id="realGold" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%"   stop-color="#f8e9a1" />  <!-- punto más claro -->
+              <stop offset="30%"  stop-color="#f1d360" />  <!-- intermedio suave -->
+              <stop offset="60%"  stop-color="#d4af37" />  <!-- tono medio auténtico -->
+              <stop offset="100%" stop-color="#8c6b1c" />  <!-- sombra profunda -->
             </linearGradient>
           </defs>
         </svg>
@@ -167,7 +172,7 @@
     ////////////////////////////////////////////////
 
     const prizes = [
-      // Sectores dorados con degradado lineal ("gradGold"), sectores negros con "#111"
+      // Sectores dorados con degradado realista ("gradGold"), sectores negros con "#111"
       { text: "POSTRE GRATIS",     bgColor: "gradGold", textColor: "#111" },
       { text: "10% DESCUENTO",     bgColor: "#111",     textColor: "#f8f8f8" },
       { text: "CAFÉ GRATIS",       bgColor: "gradGold", textColor: "#111" },
@@ -207,13 +212,13 @@
         wheelGroup.removeChild(wheelGroup.firstChild);
       }
 
-      // 3.1) DIBUJAR EL BORDE EXTERIOR DORADO (usando el mismo degradado lineal suave)
+      // 3.1) DIBUJAR EL BORDE EXTERIOR DORADO (usando el mismo degradado realista)
       const borderCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       borderCircle.setAttribute("cx", cx);
       borderCircle.setAttribute("cy", cy);
       borderCircle.setAttribute("r", radius + borderWidth / 2);
       borderCircle.setAttribute("fill", "none");
-      borderCircle.setAttribute("stroke", "url(#softGoldLinear)");
+      borderCircle.setAttribute("stroke", "url(#realGold)");
       borderCircle.setAttribute("stroke-width", borderWidth);
       wheelGroup.appendChild(borderCircle);
 
@@ -241,19 +246,19 @@
         const sectorPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
         sectorPath.setAttribute("d", pathData);
 
-        // Si bgColor es "gradGold", usamos el degradado lineal suave; si no, negro plano
+        // Si bgColor es "gradGold", usamos el degradado realista; si no, negro plano
         if (prize.bgColor === "gradGold") {
-          sectorPath.setAttribute("fill", "url(#softGoldLinear)");
+          sectorPath.setAttribute("fill", "url(#realGold)");
         } else {
           sectorPath.setAttribute("fill", prize.bgColor);
         }
-        // El borde de cada sector se dibuja con el mismo degradado lineal
-        sectorPath.setAttribute("stroke", "url(#softGoldLinear)");
+        // El borde de cada sector se dibuja con el mismo degradado realista
+        sectorPath.setAttribute("stroke", "url(#realGold)");
         sectorPath.setAttribute("stroke-width", "1");
         wheelGroup.appendChild(sectorPath);
 
         // Calcular ángulo medio para colocar el texto
-        const midAngle = startAngle + anglePerSegment / 2;
+        const midAngle = startAngle + anglePerSegment / 2; // e.g. 30, 90, 150, ...
         const midRad   = toRad(midAngle);
         const textRadius = radius - 60; // alejamos el texto del borde exterior
 
