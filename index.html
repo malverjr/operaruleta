@@ -5,19 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ruleta Opera Maritim</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <style>
+    :root {
+      --oro: #caa86f;
+      --negro: #111;
+      --blanco: #f8f8f8;
+    }
     body {
       font-family: 'Montserrat', sans-serif;
-      background-color: #111;
-      color: #f8f8f8;
+      background-color: var(--negro);
+      color: var(--blanco);
       margin: 0;
       padding: 0;
       text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .container {
       max-width: 600px;
-      margin: 0 auto;
+      width: 100%;
       padding: 20px;
+      box-sizing: border-box;
     }
     .logo {
       width: 180px;
@@ -26,58 +37,182 @@
     .wheel-container {
       margin: 30px auto;
       position: relative;
-    }
-    .wheel {
       width: 300px;
       height: 300px;
+    }
+    .wheel {
+      width: 100%;
+      height: 100%;
       border-radius: 50%;
-      background: conic-gradient(
-        #caa86f 0% 25%,
-        #111 25% 50%,
-        #caa86f 50% 75%,
-        #111 75% 100%
-      );
       position: relative;
-      margin: 0 auto;
+      overflow: hidden;
+      box-shadow: 0 0 0 8px var(--oro), 0 0 30px rgba(202, 168, 111, 0.6);
+      transition: transform 4s cubic-bezier(0.17, 0.67, 0.21, 0.99);
+    }
+    .wheel-item {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      transform-origin: 100% 100%;
+      left: 0;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 13px;
+      text-align: center;
+      padding-right: 50px;
+      box-sizing: border-box;
+      transform: rotate(30deg) skewY(-30deg);
+      text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
     }
     .spin-btn {
-      background-color: #caa86f;
-      color: #111;
+      background-color: var(--oro);
+      color: var(--negro);
       border: none;
-      padding: 12px 25px;
-      font-size: 16px;
+      padding: 15px 40px;
+      font-size: 18px;
       font-weight: bold;
       border-radius: 4px;
       cursor: pointer;
       margin-top: 20px;
+      transition: all 0.3s;
+      font-family: 'Playfair Display', serif;
+      letter-spacing: 1px;
+    }
+    .spin-btn:hover {
+      background-color: #d8b878;
+      transform: scale(1.05);
+    }
+    .pointer {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 30px;
+      background-color: var(--oro);
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      z-index: 10;
+    }
+    .email-input {
+      width: 80%;
+      padding: 12px;
+      margin: 15px 0;
+      border: 2px solid var(--oro);
+      border-radius: 4px;
+      background: rgba(0,0,0,0.2);
+      color: white;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="appContainer">
     <img src="https://operamaritim.com/wp-content/uploads/2025/01/logotipo-opera-maritim-blanco.png" alt="Opera Maritim" class="logo">
-    <h1 style="color: #caa86f;">¡Gira la ruleta y gana!</h1>
-    <div class="wheel-container">
-      <div class="wheel" id="wheel"></div>
+    <h1 style="color: var(--oro); font-family: 'Playfair Display', serif;">¡Gira y descubre tu premio!</h1>
+    
+    <div id="emailSection" style="display: block;">
+      <p>Introduce tu email para participar:</p>
+      <input type="email" id="userEmail" class="email-input" placeholder="tucorreo@ejemplo.com">
+      <button class="spin-btn" onclick="verifyEmail()">CONTINUAR</button>
     </div>
-    <button class="spin-btn" onclick="spinWheel()">GIRAR</button>
+    
+    <div id="wheelSection" style="display: none;">
+      <div class="wheel-container">
+        <div class="pointer"></div>
+        <div class="wheel" id="wheel"></div>
+      </div>
+      <button class="spin-btn" id="spinBtn">GIRAR</button>
+    </div>
   </div>
 
   <script>
-    const prizes = ["Postre gratis", "2x1 en cócteles", "Descuento 20%"];
+    // Configuración de EmailJS (TUS DATOS)
+    emailjs.init('4KSxHkuk_apCg_kyS'); // Tu Public Key
     
+    // Premios personalizados
+    const prizes = [
+      { text: "Postre gratis", color: "#caa86f", textColor: "#111" },
+      { text: "10% descuento", color: "#111", textColor: "#f8f8f8" },
+      { text: "Café gratis", color: "#caa86f", textColor: "#111" },
+      { text: "5% descuento", color: "#111", textColor: "#f8f8f8" },
+      { text: "Bebida gratis", color: "#caa86f", textColor: "#111" },
+      { text: "15% descuento", color: "#111", textColor: "#f8f8f8" }
+    ];
+
+    // Variables globales
+    const wheel = document.getElementById('wheel');
+    const spinBtn = document.getElementById('spinBtn');
+    let userEmail = "";
+
+    // Verificar email
+    function verifyEmail() {
+      const emailInput = document.getElementById('userEmail').value;
+      if (!emailInput.includes("@") || !emailInput.includes(".")) {
+        alert("Por favor, introduce un email válido");
+        return;
+      }
+      userEmail = emailInput;
+      document.getElementById('emailSection').style.display = "none";
+      document.getElementById('wheelSection').style.display = "block";
+      initWheel();
+    }
+
+    // Crear ruleta visual
+    function initWheel() {
+      prizes.forEach((prize, index) => {
+        const slice = document.createElement('div');
+        slice.className = 'wheel-item';
+        slice.textContent = prize.text;
+        slice.style.backgroundColor = prize.color;
+        slice.style.color = prize.textColor;
+        slice.style.transform = `rotate(${index * 60}deg) skewY(-30deg)`;
+        wheel.appendChild(slice);
+      });
+    }
+
+    // Función para girar
     function spinWheel() {
-      const wheel = document.getElementById('wheel');
+      spinBtn.disabled = true;
       const winnerIndex = Math.floor(Math.random() * prizes.length);
-      const degrees = 1080 + (winnerIndex * 120); // 1080° = 3 vueltas
+      const degrees = 1800 + (winnerIndex * 60); // 5 vueltas + ajuste
       
       wheel.style.transform = `rotate(${degrees}deg)`;
-      wheel.style.transition = 'transform 3s ease-out';
       
       setTimeout(() => {
-        alert(`¡Ganaste: ${prizes[winnerIndex]}!`);
-      }, 3000);
+        sendPrizeEmail(prizes[winnerIndex].text);
+        spinBtn.disabled = false;
+      }, 4000);
     }
+
+    // Función para enviar email con premio
+    function sendPrizeEmail(premio) {
+      const codigo = generarCodigo();
+      const fechaValidez = new Date();
+      fechaValidez.setDate(fechaValidez.getDate() + 30); // 30 días de validez
+
+      emailjs.send('service_t4py4c5', 'template_sby6x8j', {
+        to_email: userEmail,
+        premio: premio,
+        codigo: codigo,
+        fecha: fechaValidez.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      }).then(() => {
+        alert(`¡Felicidades!\nGanaste: ${premio}\nHemos enviado tu código a: ${userEmail}`);
+      }, (error) => {
+        alert(`¡Felicidades!\nGanaste: ${premio}\nCódigo: ${codigo}\n(valido hasta ${fechaValidez.toLocaleDateString()})`);
+        console.error('Error al enviar email:', error);
+      });
+    }
+
+    // Generar código aleatorio
+    function generarCodigo() {
+      return 'OP' + Math.floor(Math.random() * 9000 + 1000);
+    }
+
+    // Evento del botón
+    spinBtn.addEventListener('click', spinWheel);
   </script>
 </body>
 </html>
