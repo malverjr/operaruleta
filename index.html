@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OPERA MARITIM - Ruleta de Premios</title>
+  <title>Ruleta Opera Maritim</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -16,7 +16,7 @@
       background-color: var(--negro);
       color: var(--blanco);
       margin: 0;
-      padding: 20px;
+      padding: 0;
       text-align: center;
       min-height: 100vh;
       display: flex;
@@ -25,13 +25,19 @@
     }
     .container {
       max-width: 500px;
-      width: 100%;
+      width: 90%;
+      padding: 30px;
+      margin: 20px auto;
+      background: rgba(17, 17, 17, 0.9);
+      border-radius: 12px;
+      border: 1px solid var(--oro);
+      box-shadow: 0 0 25px rgba(202, 168, 111, 0.3);
     }
     .logo {
       width: 180px;
-      margin: 20px 0;
+      margin-bottom: 20px;
     }
-    .title {
+    h1 {
       color: var(--oro);
       font-family: 'Playfair Display', serif;
       margin-bottom: 30px;
@@ -40,36 +46,11 @@
       position: relative;
       width: 300px;
       height: 300px;
-      margin: 30px auto;
+      margin: 0 auto 30px;
     }
-    .wheel {
+    #wheelCanvas {
       width: 100%;
       height: 100%;
-      border-radius: 50%;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 0 0 8px var(--oro), 0 0 30px rgba(202, 168, 111, 0.6);
-    }
-    .wheel-segment {
-      position: absolute;
-      width: 50%;
-      height: 50%;
-      transform-origin: 100% 100%;
-      left: 0;
-      top: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 14px;
-      text-align: center;
-      box-sizing: border-box;
-      padding-right: 80px;
-    }
-    .wheel-text {
-      transform: rotate(90deg) translateX(50px);
-      width: 100px;
-      text-align: center;
     }
     .spin-btn {
       background-color: var(--oro);
@@ -82,6 +63,10 @@
       cursor: pointer;
       margin-top: 20px;
       font-family: 'Playfair Display', serif;
+      transition: all 0.3s;
+    }
+    .spin-btn:hover {
+      transform: scale(1.05);
     }
     .pointer {
       position: absolute;
@@ -109,20 +94,32 @@
       color: #aaa;
       margin-top: 20px;
     }
+    #emailSection {
+      display: block;
+    }
+    #wheelSection {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <img src="https://operamaritim.com/wp-content/uploads/2025/01/logotipo-opera-maritim-blanco.png" alt="Opera Maritim" class="logo">
-    <h1 class="title">¡Gira y descubre tu premio!</h1>
+    <h1>¡Gira y descubre tu premio!</h1>
     
-    <div class="wheel-container">
-      <div class="pointer"></div>
-      <div class="wheel" id="wheel"></div>
+    <div id="emailSection">
+      <p>Introduce tu email para participar:</p>
+      <input type="email" id="userEmail" class="email-input" placeholder="tucorreo@ejemplo.com">
+      <button class="spin-btn" onclick="verifyEmail()">CONTINUAR</button>
     </div>
     
-    <input type="email" id="userEmail" class="email-input" placeholder="Correo electrónico">
-    <button class="spin-btn" id="spinBtn">GIRAR</button>
+    <div id="wheelSection">
+      <div class="wheel-container">
+        <div class="pointer"></div>
+        <canvas id="wheelCanvas" width="300" height="300"></canvas>
+      </div>
+      <button class="spin-btn" id="spinBtn">GIRAR</button>
+    </div>
     
     <p class="disclaimer">
       * Premios válidos por 30 días. Presenta tu código en el restaurante.
@@ -130,7 +127,7 @@
   </div>
 
   <script>
-    // Premios
+    // Configuración
     const prizes = [
       { text: "POSTRE GRATIS", color: "#caa86f", textColor: "#111" },
       { text: "10% DESCUENTO", color: "#111", textColor: "#f8f8f8" },
@@ -140,41 +137,112 @@
       { text: "15% DESCUENTO", color: "#111", textColor: "#f8f8f8" }
     ];
 
-    // Crear ruleta
-    const wheel = document.getElementById('wheel');
-    prizes.forEach((prize, index) => {
-      const segment = document.createElement('div');
-      segment.className = 'wheel-segment';
-      segment.style.backgroundColor = prize.color;
-      segment.style.transform = `rotate(${index * 60}deg) skewY(-30deg)`;
-      
-      const text = document.createElement('div');
-      text.className = 'wheel-text';
-      text.textContent = prize.text;
-      text.style.color = prize.textColor;
-      
-      segment.appendChild(text);
-      wheel.appendChild(segment);
-    });
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    let currentRotation = 0;
+    let spinning = false;
+    let userEmail = "";
 
-    // Girar ruleta
-    document.getElementById('spinBtn').addEventListener('click', () => {
-      const email = document.getElementById('userEmail').value;
-      if (!email.includes('@')) {
+    // Dibujar ruleta
+    function drawWheel() {
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = Math.min(centerX, centerY) - 10;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Dibujar segmentos
+      prizes.forEach((prize, i) => {
+        const startAngle = (i * 2 * Math.PI / prizes.length) + currentRotation;
+        const endAngle = ((i + 1) * 2 * Math.PI / prizes.length) + currentRotation;
+        
+        // Segmento
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = prize.color;
+        ctx.fill();
+        ctx.strokeStyle = prize.color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Texto
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(startAngle + (Math.PI / prizes.length));
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = prize.textColor;
+        ctx.font = "bold 12px Montserrat";
+        ctx.fillText(prize.text, radius / 2 + 10, 0);
+        ctx.restore();
+      });
+      
+      // Centro
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 20, 0, 2 * Math.PI);
+      ctx.fillStyle = "#111";
+      ctx.fill();
+      ctx.strokeStyle = "#caa86f";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      
+      // Borde
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.strokeStyle = "#caa86f";
+      ctx.lineWidth = 8;
+      ctx.stroke();
+    }
+
+    // Verificar email
+    function verifyEmail() {
+      const emailInput = document.getElementById('userEmail').value;
+      if (!emailInput.includes("@") || !emailInput.includes(".")) {
         alert("Por favor, introduce un email válido");
         return;
       }
+      userEmail = emailInput;
+      document.getElementById('emailSection').style.display = "none";
+      document.getElementById('wheelSection').style.display = "block";
+      drawWheel();
+    }
+
+    // Girar ruleta
+    document.getElementById('spinBtn').addEventListener('click', function() {
+      if (spinning) return;
       
+      spinning = true;
+      const spinDuration = 4000; // 4 segundos
       const winnerIndex = Math.floor(Math.random() * prizes.length);
-      const degrees = 1800 + (winnerIndex * 60);
+      const targetRotation = currentRotation + 10 * Math.PI + (2 * Math.PI * winnerIndex / prizes.length);
       
-      wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.21, 0.99)';
-      wheel.style.transform = `rotate(${degrees}deg)`;
+      const startTime = Date.now();
       
-      setTimeout(() => {
-        alert(`¡Ganaste: ${prizes[winnerIndex].text}!`);
-      }, 4000);
+      function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / spinDuration, 1);
+        const easeProgress = 1 - Math.pow(1 - progress, 3); // Easing
+        currentRotation = easeProgress * (targetRotation - currentRotation) + currentRotation;
+        
+        drawWheel();
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          spinning = false;
+          setTimeout(() => {
+            alert(`¡Ganaste: ${prizes[winnerIndex].text}!`);
+          }, 500);
+        }
+      }
+      
+      animate();
     });
+
+    // Dibujar inicialmente
+    drawWheel();
   </script>
 </body>
 </html>
