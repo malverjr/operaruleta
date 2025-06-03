@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ruleta Opera Maritim (SVG + Email + Oro con Borde Gradiente)</title>
+  <title>Ruleta Opera Maritim (SVG + Email + Ajustes)</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -76,9 +76,9 @@
       transform: translateX(-50%);
       width: 30px;
       height: 30px;
-      /* Puntero con degradado lineal dorado */
+      /* Puntero invertido: punta hacia abajo */
       background: linear-gradient(145deg, #f9e285 0%, #c7a238 50%, #f9e285 100%);
-      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
       z-index: 2;
     }
     .spin-btn {
@@ -287,9 +287,10 @@
       const winnerIndex = Math.floor(Math.random() * totalSegments);
       const centerOfWinner = winnerIndex * anglePerSegment + anglePerSegment / 2;
 
-      // Añadimos 3 vueltas completas (3 * 360°) antes de aterrizar
+      // Añadimos 3 vueltas completas (3 * 360°) y compensamos con +90° 
+      // para que la flecha (apuntando hacia abajo) coincida con el sector
       const extraSpins = 3 * 360;
-      const targetRotation = extraSpins + centerOfWinner;
+      const targetRotation = extraSpins + centerOfWinner + 90;
 
       const duration = 4000;
       const startRotation = currentRotation;
@@ -326,3 +327,4 @@
   </script>
 </body>
 </html>
+
