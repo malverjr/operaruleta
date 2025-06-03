@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ruleta Opera Maritim (SVG)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ruleta Opera Maritim (SVG + Email)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --oro: #caa86f;
@@ -36,14 +37,35 @@
       margin-bottom: 30px;
     }
 
-    /* Contenedor de la ruleta SVG */
+    /* Sección de email */
+    #emailSection {
+      display: block;
+    }
+    .email-input {
+      width: 80%;
+      padding: 12px;
+      margin: 15px 0;
+      border: 2px solid var(--oro);
+      border-radius: 4px;
+      background: rgba(0,0,0,0.2);
+      color: white;
+      font-size: 16px;
+    }
+
+    /* Sección de la rueda oculta inicialmente */
+    #wheelSection {
+      display: none;
+    }
     .wheel-container {
       position: relative;
       width: 320px;
       height: 320px;
-      margin: 0 auto 20px;
+      margin: 30px auto;
     }
-    /* El puntero en la parte superior */
+    #wheelSvg {
+      width: 100%;
+      height: 100%;
+    }
     .pointer {
       position: absolute;
       top: -10px;
@@ -55,12 +77,6 @@
       clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
       z-index: 2;
     }
-    /* El SVG de la rueda ocupa todo el contenedor */
-    #wheelSvg {
-      width: 100%;
-      height: 100%;
-    }
-    /* Botón Girar */
     .spin-btn {
       background-color: var(--oro);
       color: var(--negro);
@@ -71,7 +87,7 @@
       border-radius: 4px;
       cursor: pointer;
       font-family: 'Playfair Display', serif;
-      margin-top: 10px;
+      margin-top: 20px;
     }
     .disclaimer {
       font-size: 12px;
@@ -87,13 +103,20 @@
 
     <h1>¡Gira y descubre tu premio!</h1>
 
-    <!-- Aquí va el contenedor de la ruleta SVG -->
+    <!-- Sección para introducir email -->
+    <div id="emailSection">
+      <p>Introduce tu email para participar:</p>
+      <input type="email" id="userEmail" class="email-input" placeholder="tucorreo@ejemplo.com">
+      <button class="spin-btn" onclick="verifyEmail()">CONTINUAR</button>
+    </div>
+
+    <!-- Sección de la rueda (oculta hasta que el email sea válido) -->
     <div id="wheelSection">
       <div class="wheel-container">
         <div class="pointer"></div>
-        <!-- SVG LÍNEA BASE: dentro iremos generando los sectores -->
+        <!-- SVG para la ruleta -->
         <svg id="wheelSvg" viewBox="0 0 320 320">
-          <!-- Dentro de este <svg> habrá un <g id="wheelGroup"> ... -->
+          <!-- Los <path> y <text> se generarán con JavaScript dentro de este <svg> -->
         </svg>
       </div>
       <button class="spin-btn" id="spinBtn">GIRAR</button>
@@ -109,7 +132,6 @@
     // 1) CONFIGURACIÓN DE PREMIOS Y PARÁMETROS
     ////////////////////////////////////////////////
 
-    // Array de premios (texto, color de fondo del sector y color de la fuente)
     const prizes = [
       { text: "POSTRE GRATIS",     bgColor: "#caa86f", textColor: "#111" },
       { text: "10% DESCUENTO",     bgColor: "#111",   textColor: "#f8f8f8" },
@@ -119,42 +141,38 @@
       { text: "15% DESCUENTO",     bgColor: "#111",   textColor: "#f8f8f8" }
     ];
 
-    // Dimensiones del SVG y círculo
-    const svgSize = 320;      // 320×320
+    const svgSize = 320;
     const cx = svgSize / 2;   // 160
     const cy = svgSize / 2;   // 160
-    const radius = 150;       // Radio interior de la rueda
-    const borderWidth = 10;   // Ancho del borde dorado exterior
+    const radius = 150;       // radio de la rueda
+    const borderWidth = 10;   // grosor del borde dorado
 
-    const totalSegments = prizes.length;              // 6
-    const anglePerSegment = 360 / totalSegments;      // 60°
+    const totalSegments = prizes.length;            // 6
+    const anglePerSegment = 360 / totalSegments;    // 60°
 
-    // Tomamos el <svg> y creamos un <g> que contendrá todos los sectores y textos
     const wheelSvg = document.getElementById("wheelSvg");
     const wheelGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
     wheelGroup.setAttribute("id", "wheelGroup");
-    // Para que la rotación se centre en (cx, cy):
     wheelGroup.setAttribute("transform", `rotate(0 ${cx} ${cy})`);
     wheelSvg.appendChild(wheelGroup);
 
-    //////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////
     // 2) FUNCIÓN PARA CONVERTIR GRADOS A RADIANES
-    //////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////
     function toRad(deg) {
       return (deg * Math.PI) / 180;
     }
 
-    //////////////////////////////////////////////////////////////
-    // 3) FUNCIÓN QUE DIBUJA TODOS LOS SECTORES Y SUS TEXTOS
-    //////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////
+    // 3) FUNCIÓN PARA DIBUJAR LA RUEDA COMPLETA
+    ////////////////////////////////////////////////
     function drawWheel() {
-      // Eliminamos cualquier cosa previa (en caso de re-dibujado)
+      // Limpiar cualquier contenido previo
       while (wheelGroup.firstChild) {
         wheelGroup.removeChild(wheelGroup.firstChild);
       }
 
-      // 3.1) DIBUJAR EL CÍRCULO EXTERIOR DORADO (solo borde)
-      //    Esto crea el contorno visible de la rueda
+      // 3.1) DIBUJAR EL BORDE EXTERIOR DORADO
       const borderCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       borderCircle.setAttribute("cx", cx);
       borderCircle.setAttribute("cy", cy);
@@ -164,24 +182,19 @@
       borderCircle.setAttribute("stroke-width", borderWidth);
       wheelGroup.appendChild(borderCircle);
 
-      // 3.2) DIBUJAR CADA SECTOR (PATH + TEXTO)
+      // 3.2) DIBUJAR CADA SECTOR Y SU TEXTO
       prizes.forEach((prize, i) => {
-        // Ángulo inicial y final (en grados) para este sector
-        const startAngle = i * anglePerSegment;          // por ejemplo: 0, 60, 120, ...
-        const endAngle   = startAngle + anglePerSegment; // por ejemplo: 60, 120, 180, ...
+        const startAngle = i * anglePerSegment;          // 0, 60, 120, ...
+        const endAngle   = startAngle + anglePerSegment; // 60, 120, 180, ...
 
-        // Convertimos a radianes para Math.cos/sin
         const startRad = toRad(startAngle);
         const endRad   = toRad(endAngle);
 
-        // Coordenadas del punto en el borde externo
         const x1 = cx + radius * Math.cos(startRad);
         const y1 = cy + radius * Math.sin(startRad);
         const x2 = cx + radius * Math.cos(endRad);
         const y2 = cy + radius * Math.sin(endRad);
 
-        // Path: M centro → L punto1 → arco → punto2 → Z
-        // "A radius,radius 0 0,1 x2,y2" dibuja un arco de circunferencia de startRad a endRad
         const pathData = [
           `M ${cx},${cy}`,
           `L ${x1},${y1}`,
@@ -189,7 +202,7 @@
           `Z`
         ].join(" ");
 
-        // 3.2.1) Creamos el <path> del sector
+        // Crear <path> del sector
         const sectorPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
         sectorPath.setAttribute("d", pathData);
         sectorPath.setAttribute("fill", prize.bgColor);
@@ -197,66 +210,65 @@
         sectorPath.setAttribute("stroke-width", "1");
         wheelGroup.appendChild(sectorPath);
 
-        // 3.2.2) Calcular el punto medio angular para colocar el texto siempre horizontal
-        // El “ángulo medio” es (startAngle + endAngle)/2
-        const midAngle = startAngle + anglePerSegment / 2;
+        // Calcular ángulo medio para colocar el texto
+        const midAngle = startAngle + anglePerSegment / 2; // e.g. 30, 90, 150, ...
         const midRad   = toRad(midAngle);
+        const textRadius = radius - 60; // alejamos el texto del borde exterior
 
-        // Elegimos un radio ligeramente menor para que el texto no choque con el borde
-        // Por ejemplo, a 90 px del centro (o sea, radius - 60)
-        const textRadius = radius - 60; 
-
-        // Coordenadas en las que se ubicará el texto (punto central radial de cada sector)
         const textX = cx + textRadius * Math.cos(midRad);
         const textY = cy + textRadius * Math.sin(midRad);
 
-        // 3.2.3) Creamos el <text> para el contenido del premio
+        // Crear <text> y ubicarlo en (textX, textY)
         const svgText = document.createElementNS("http://www.w3.org/2000/svg", "text");
         svgText.textContent = prize.text;
         svgText.setAttribute("x", textX);
         svgText.setAttribute("y", textY);
         svgText.setAttribute("fill", prize.textColor);
         svgText.setAttribute("font-family", "Montserrat, sans-serif");
-        svgText.setAttribute("font-size", "14");
+        svgText.setAttribute("font-size", "12");         // ←– Tamaño reducido para encajar mejor
         svgText.setAttribute("font-weight", "600");
         svgText.setAttribute("text-anchor", "middle");
         svgText.setAttribute("alignment-baseline", "middle");
-        // Para que el texto siempre esté horizontal, no lo rotamos; permanece a 0°.
+        // No rotamos el texto para que siempre esté horizontal
         wheelGroup.appendChild(svgText);
       });
     }
 
-    //////////////////////////////////////////////////////////////
-    // 4) INICIALIZAR RUEDA
-    //////////////////////////////////////////////////////////////
-    drawWheel();
+    ////////////////////////////////////////////////
+    // 4) FUNCIÓN PARA VERIFICAR EMAIL Y MOSTRAR RUEDA
+    ////////////////////////////////////////////////
+    function verifyEmail() {
+      const emailInput = document.getElementById('userEmail').value;
+      if (!emailInput.includes("@") || !emailInput.includes(".")) {
+        alert("Por favor, introduce un email válido");
+        return;
+      }
+      // Ocultar sección de email y mostrar la rueda
+      document.getElementById('emailSection').style.display = "none";
+      document.getElementById('wheelSection').style.display = "block";
+      // Dibujamos la rueda SVG
+      drawWheel();
+    }
 
-    //////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////
     // 5) ANIMACIÓN DE GIRO
-    //////////////////////////////////////////////////////////////
-    let currentRotation = 0;  // Lleva el ángulo de rotación acumulado
-    let spinning = false;     // Para evitar múltiples clics simultáneos
+    ////////////////////////////////////////////////
+    let currentRotation = 0;
+    let spinning = false;
     const spinBtn = document.getElementById("spinBtn");
 
     spinBtn.addEventListener("click", () => {
       if (spinning) return;
       spinning = true;
 
-      // Elegimos un índice ganador al azar (de 0 a totalSegments-1)
       const winnerIndex = Math.floor(Math.random() * totalSegments);
-      // Queremos que la flecha apunte exactamente al centro de ese sector cuando se detenga.
-      // El ángulo (en grados) del centro del sector ganador es:
-      //    centroSector = winnerIndex * anglePerSegment + anglePerSegment/2
-      const centerOfWinner = winnerIndex * anglePerSegment + anglePerSegment / 2;
+      const centerOfWinner = winnerIndex * anglePerSegment + anglePerSegment / 2; // e.g. 30, 90, 150, ...
 
-      // Para dar varias vueltas antes de detenernos, agregamos (por ejemplo) 3 vueltas completas = 3 * 360
-      const extraSpins = 3 * 360; 
-      // El ángulo final deseado (en grados) -- invertimos el signo porque giramos el <g> en sentido horario
+      // Añadimos 3 vueltas completas (3 * 360°) antes de aterrizar
+      const extraSpins = 3 * 360;
       const targetRotation = extraSpins + centerOfWinner;
 
-      // Duración de la animación en milisegundos
-      const duration = 4000; // 4 segundos
-
+      const duration = 4000;
       const startRotation = currentRotation;
       const startTime = Date.now();
 
@@ -267,20 +279,18 @@
       function animate() {
         const now = Date.now();
         const elapsed = now - startTime;
-        const t = Math.min(elapsed / duration, 1); // de 0 a 1
+        const t = Math.min(elapsed / duration, 1);
         const easedT = easeOutCubic(t);
 
-        // Interpolamos entre el ángulo inicial y el final:
         const newRotation = startRotation + (targetRotation - startRotation) * easedT;
         currentRotation = newRotation;
 
-        // Aplicamos la rotación al grupo
+        // Rotar el <g> completo alrededor de (cx, cy)
         wheelGroup.setAttribute("transform", `rotate(${-currentRotation} ${cx} ${cy})`);
 
         if (t < 1) {
           requestAnimationFrame(animate);
         } else {
-          // Al terminar la animación, detenemos y mostramos alerta
           spinning = false;
           setTimeout(() => {
             alert(`¡Ganaste: ${prizes[winnerIndex].text}!`);
