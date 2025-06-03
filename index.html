@@ -16,7 +16,7 @@
       background-color: var(--negro);
       color: var(--blanco);
       margin: 0;
-      padding: 0;
+      padding: 20px;
       text-align: center;
       min-height: 100vh;
       display: flex;
@@ -25,17 +25,11 @@
     }
     .container {
       max-width: 500px;
-      width: 90%;
-      padding: 30px;
-      margin: 20px auto;
-      background: rgba(17, 17, 17, 0.9);
-      border-radius: 12px;
-      border: 1px solid var(--oro);
-      box-shadow: 0 0 25px rgba(202, 168, 111, 0.3);
+      width: 100%;
     }
     .logo {
       width: 180px;
-      margin-bottom: 20px;
+      margin: 20px 0;
     }
     h1 {
       color: var(--oro);
@@ -44,13 +38,58 @@
     }
     .wheel-container {
       position: relative;
-      width: 300px;
-      height: 300px;
-      margin: 0 auto 30px;
+      width: 320px;
+      height: 320px;
+      margin: 30px auto;
     }
-    #wheelCanvas {
+    .wheel {
       width: 100%;
       height: 100%;
+      position: relative;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 0 0 8px var(--oro), 0 0 30px rgba(202, 168, 111, 0.6);
+    }
+    .wheel-segment {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      transform-origin: 100% 100%;
+      left: 0;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .segment-content {
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      transform-origin: 0 0;
+      display: flex;
+      align-items: center;
+      padding-left: 40px;
+      box-sizing: border-box;
+    }
+    .segment-text {
+      font-weight: 600;
+      font-size: 14px;
+      text-align: center;
+      width: 80px;
+      transform: rotate(90deg) translateX(40px);
+      line-height: 1.2;
+    }
+    .pointer {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 30px;
+      background-color: var(--oro);
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      z-index: 10;
     }
     .spin-btn {
       background-color: var(--oro);
@@ -63,21 +102,6 @@
       cursor: pointer;
       margin-top: 20px;
       font-family: 'Playfair Display', serif;
-      transition: all 0.3s;
-    }
-    .spin-btn:hover {
-      transform: scale(1.05);
-    }
-    .pointer {
-      position: absolute;
-      top: -15px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 30px;
-      height: 30px;
-      background-color: var(--oro);
-      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-      z-index: 10;
     }
     .email-input {
       width: 80%;
@@ -116,7 +140,7 @@
     <div id="wheelSection">
       <div class="wheel-container">
         <div class="pointer"></div>
-        <canvas id="wheelCanvas" width="300" height="300"></canvas>
+        <div class="wheel" id="wheel"></div>
       </div>
       <button class="spin-btn" id="spinBtn">GIRAR</button>
     </div>
@@ -137,63 +161,32 @@
       { text: "15% DESCUENTO", color: "#111", textColor: "#f8f8f8" }
     ];
 
-    const canvas = document.getElementById('wheelCanvas');
-    const ctx = canvas.getContext('2d');
+    // Crear ruleta
+    const wheel = document.getElementById('wheel');
     let currentRotation = 0;
     let spinning = false;
     let userEmail = "";
 
-    // Dibujar ruleta
-    function drawWheel() {
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      const radius = Math.min(centerX, centerY) - 10;
-      
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Dibujar segmentos
-      prizes.forEach((prize, i) => {
-        const startAngle = (i * 2 * Math.PI / prizes.length) + currentRotation;
-        const endAngle = ((i + 1) * 2 * Math.PI / prizes.length) + currentRotation;
+    function initWheel() {
+      wheel.innerHTML = '';
+      prizes.forEach((prize, index) => {
+        const segment = document.createElement('div');
+        segment.className = 'wheel-segment';
+        segment.style.backgroundColor = prize.color;
+        segment.style.transform = `rotate(${index * 60}deg) skewY(-30deg)`;
         
-        // Segmento
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-        ctx.closePath();
-        ctx.fillStyle = prize.color;
-        ctx.fill();
-        ctx.strokeStyle = prize.color;
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        const content = document.createElement('div');
+        content.className = 'segment-content';
         
-        // Texto
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(startAngle + (Math.PI / prizes.length));
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = prize.textColor;
-        ctx.font = "bold 12px Montserrat";
-        ctx.fillText(prize.text, radius / 2 + 10, 0);
-        ctx.restore();
+        const text = document.createElement('div');
+        text.className = 'segment-text';
+        text.textContent = prize.text;
+        text.style.color = prize.textColor;
+        
+        content.appendChild(text);
+        segment.appendChild(content);
+        wheel.appendChild(segment);
       });
-      
-      // Centro
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, 20, 0, 2 * Math.PI);
-      ctx.fillStyle = "#111";
-      ctx.fill();
-      ctx.strokeStyle = "#caa86f";
-      ctx.lineWidth = 4;
-      ctx.stroke();
-      
-      // Borde
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-      ctx.strokeStyle = "#caa86f";
-      ctx.lineWidth = 8;
-      ctx.stroke();
     }
 
     // Verificar email
@@ -206,7 +199,7 @@
       userEmail = emailInput;
       document.getElementById('emailSection').style.display = "none";
       document.getElementById('wheelSection').style.display = "block";
-      drawWheel();
+      initWheel();
     }
 
     // Girar ruleta
@@ -214,19 +207,21 @@
       if (spinning) return;
       
       spinning = true;
-      const spinDuration = 4000; // 4 segundos
+      const spinDuration = 4000;
       const winnerIndex = Math.floor(Math.random() * prizes.length);
-      const targetRotation = currentRotation + 10 * Math.PI + (2 * Math.PI * winnerIndex / prizes.length);
+      const targetRotation = currentRotation + 1800 + (winnerIndex * 60);
       
       const startTime = Date.now();
       
       function animate() {
-        const elapsed = Date.now() - startTime;
+        const now = Date.now();
+        const elapsed = now - startTime;
         const progress = Math.min(elapsed / spinDuration, 1);
-        const easeProgress = 1 - Math.pow(1 - progress, 3); // Easing
-        currentRotation = easeProgress * (targetRotation - currentRotation) + currentRotation;
+        const easeProgress = Math.pow(progress - 1, 3) + 1; // EaseOutCubic
         
-        drawWheel();
+        currentRotation = currentRotation + (easeProgress * (targetRotation - currentRotation));
+        wheel.style.transform = `rotate(${-currentRotation}deg)`;
+        wheel.style.transition = `transform ${spinDuration/1000}s cubic-bezier(0.17, 0.67, 0.21, 0.99)`;
         
         if (progress < 1) {
           requestAnimationFrame(animate);
@@ -240,9 +235,6 @@
       
       animate();
     });
-
-    // Dibujar inicialmente
-    drawWheel();
   </script>
 </body>
 </html>
