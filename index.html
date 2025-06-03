@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ruleta Opera Maritim</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ruleta Opera Maritim (SVG)</title>
   <style>
     :root {
       --oro: #caa86f;
@@ -12,11 +11,11 @@
       --blanco: #f8f8f8;
     }
     body {
-      font-family: 'Montserrat', sans-serif;
-      background-color: var(--negro);
-      color: var(--blanco);
       margin: 0;
       padding: 20px;
+      background-color: var(--negro);
+      color: var(--blanco);
+      font-family: 'Montserrat', sans-serif;
       text-align: center;
       min-height: 100vh;
       display: flex;
@@ -36,66 +35,32 @@
       font-family: 'Playfair Display', serif;
       margin-bottom: 30px;
     }
+
+    /* Contenedor de la ruleta SVG */
     .wheel-container {
       position: relative;
       width: 320px;
       height: 320px;
-      margin: 30px auto;
+      margin: 0 auto 20px;
     }
-    .wheel {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      border-radius: 50%;
-      overflow: hidden;
-      box-shadow: 0 0 0 8px var(--oro), 0 0 30px rgba(202, 168, 111, 0.6);
-    }
-    .wheel-segment {
-      position: absolute;
-      width: 50%;
-      height: 50%;
-      transform-origin: 100% 100%;
-      left: 0;
-      top: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .segment-content {
-      position: absolute;
-      width: 200%;
-      height: 200%;
-      transform-origin: 0 0;
-      display: flex;
-      align-items: center;
-      /* Aumentamos padding-left para separar el texto del vértice */ 
-      padding-left: 60px;  /* ←– aquí: antes era 40px */
-      box-sizing: border-box;
-    }
-    .segment-text {
-      font-weight: 600;
-      /* Un poco más grande para mejor legibilidad */
-      font-size: 16px; /* ←– aquí: antes era 14px */
-      text-align: center;
-      /* Ancho aumentado un poco para que quepa mejor el texto */
-      width: 100px;   /* ←– aquí: antes era 80px */
-      /* Ajustamos el translateX para compensar el padding extra */
-      transform: rotate(90deg) translateX(60px);  /* ←– aquí: antes era translateX(40px) */
-      line-height: 1.2;
-      color: inherit; /* hereda el color que se le asigne en JS */
-    }
+    /* El puntero en la parte superior */
     .pointer {
       position: absolute;
-      top: -15px;
+      top: -10px;
       left: 50%;
       transform: translateX(-50%);
       width: 30px;
       height: 30px;
       background-color: var(--oro);
       clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-      z-index: 10;
+      z-index: 2;
     }
+    /* El SVG de la rueda ocupa todo el contenedor */
+    #wheelSvg {
+      width: 100%;
+      height: 100%;
+    }
+    /* Botón Girar */
     .spin-btn {
       background-color: var(--oro);
       color: var(--negro);
@@ -105,142 +70,225 @@
       font-weight: bold;
       border-radius: 4px;
       cursor: pointer;
-      margin-top: 20px;
       font-family: 'Playfair Display', serif;
-    }
-    .email-input {
-      width: 80%;
-      padding: 12px;
-      margin: 15px 0;
-      border: 2px solid var(--oro);
-      border-radius: 4px;
-      background: rgba(0,0,0,0.2);
-      color: white;
-      font-size: 16px;
+      margin-top: 10px;
     }
     .disclaimer {
       font-size: 12px;
       color: #aaa;
       margin-top: 20px;
     }
-    #emailSection {
-      display: block;
-    }
-    #wheelSection {
-      display: none;
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="https://operamaritim.com/wp-content/uploads/2025/01/logotipo-opera-maritim-blanco.png" alt="Opera Maritim" class="logo">
+    <img src="https://operamaritim.com/wp-content/uploads/2025/01/logotipo-opera-maritim-blanco.png"
+         alt="Opera Maritim" class="logo" />
+
     <h1>¡Gira y descubre tu premio!</h1>
-    
-    <div id="emailSection">
-      <p>Introduce tu email para participar:</p>
-      <input type="email" id="userEmail" class="email-input" placeholder="tucorreo@ejemplo.com">
-      <button class="spin-btn" onclick="verifyEmail()">CONTINUAR</button>
-    </div>
-    
+
+    <!-- Aquí va el contenedor de la ruleta SVG -->
     <div id="wheelSection">
       <div class="wheel-container">
         <div class="pointer"></div>
-        <div class="wheel" id="wheel"></div>
+        <!-- SVG LÍNEA BASE: dentro iremos generando los sectores -->
+        <svg id="wheelSvg" viewBox="0 0 320 320">
+          <!-- Dentro de este <svg> habrá un <g id="wheelGroup"> ... -->
+        </svg>
       </div>
       <button class="spin-btn" id="spinBtn">GIRAR</button>
     </div>
-    
+
     <p class="disclaimer">
       * Premios válidos por 30 días. Presenta tu código en el restaurante.
     </p>
   </div>
 
   <script>
-    // Configuración
+    ////////////////////////////////////////////////
+    // 1) CONFIGURACIÓN DE PREMIOS Y PARÁMETROS
+    ////////////////////////////////////////////////
+
+    // Array de premios (texto, color de fondo del sector y color de la fuente)
     const prizes = [
-      { text: "POSTRE GRATIS", color: "#caa86f", textColor: "#111" },
-      { text: "10% DESCUENTO", color: "#111", textColor: "#f8f8f8" },
-      { text: "CAFÉ GRATIS", color: "#caa86f", textColor: "#111" },
-      { text: "5% DESCUENTO", color: "#111", textColor: "#f8f8f8" },
-      { text: "BEBIDA GRATIS", color: "#caa86f", textColor: "#111" },
-      { text: "15% DESCUENTO", color: "#111", textColor: "#f8f8f8" }
+      { text: "POSTRE GRATIS",     bgColor: "#caa86f", textColor: "#111" },
+      { text: "10% DESCUENTO",     bgColor: "#111",   textColor: "#f8f8f8" },
+      { text: "CAFÉ GRATIS",       bgColor: "#caa86f", textColor: "#111" },
+      { text: "5% DESCUENTO",      bgColor: "#111",   textColor: "#f8f8f8" },
+      { text: "BEBIDA GRATIS",     bgColor: "#caa86f", textColor: "#111" },
+      { text: "15% DESCUENTO",     bgColor: "#111",   textColor: "#f8f8f8" }
     ];
 
-    // Crear ruleta
-    const wheel = document.getElementById('wheel');
-    let currentRotation = 0;
-    let spinning = false;
-    let userEmail = "";
+    // Dimensiones del SVG y círculo
+    const svgSize = 320;      // 320×320
+    const cx = svgSize / 2;   // 160
+    const cy = svgSize / 2;   // 160
+    const radius = 150;       // Radio interior de la rueda
+    const borderWidth = 10;   // Ancho del borde dorado exterior
 
-    function initWheel() {
-      wheel.innerHTML = '';
-      prizes.forEach((prize, index) => {
-        const segment = document.createElement('div');
-        segment.className = 'wheel-segment';
-        segment.style.backgroundColor = prize.color;
-        /* Lo único que cambiamos aquí: añadimos un offset de 30 grados
-           para que cada sector se centre correctamente y estén simétricos */
-        segment.style.transform = `rotate(${index * 60 + 30}deg) skewY(-30deg)`;  /* ←– aquí */
+    const totalSegments = prizes.length;              // 6
+    const anglePerSegment = 360 / totalSegments;      // 60°
 
-        const content = document.createElement('div');
-        content.className = 'segment-content';
+    // Tomamos el <svg> y creamos un <g> que contendrá todos los sectores y textos
+    const wheelSvg = document.getElementById("wheelSvg");
+    const wheelGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    wheelGroup.setAttribute("id", "wheelGroup");
+    // Para que la rotación se centre en (cx, cy):
+    wheelGroup.setAttribute("transform", `rotate(0 ${cx} ${cy})`);
+    wheelSvg.appendChild(wheelGroup);
 
-        const text = document.createElement('div');
-        text.className = 'segment-text';
-        text.textContent = prize.text;
-        text.style.color = prize.textColor;
+    //////////////////////////////////////////////////////////////
+    // 2) FUNCIÓN PARA CONVERTIR GRADOS A RADIANES
+    //////////////////////////////////////////////////////////////
+    function toRad(deg) {
+      return (deg * Math.PI) / 180;
+    }
 
-        content.appendChild(text);
-        segment.appendChild(content);
-        wheel.appendChild(segment);
+    //////////////////////////////////////////////////////////////
+    // 3) FUNCIÓN QUE DIBUJA TODOS LOS SECTORES Y SUS TEXTOS
+    //////////////////////////////////////////////////////////////
+    function drawWheel() {
+      // Eliminamos cualquier cosa previa (en caso de re-dibujado)
+      while (wheelGroup.firstChild) {
+        wheelGroup.removeChild(wheelGroup.firstChild);
+      }
+
+      // 3.1) DIBUJAR EL CÍRCULO EXTERIOR DORADO (solo borde)
+      //    Esto crea el contorno visible de la rueda
+      const borderCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      borderCircle.setAttribute("cx", cx);
+      borderCircle.setAttribute("cy", cy);
+      borderCircle.setAttribute("r", radius + borderWidth / 2);
+      borderCircle.setAttribute("fill", "none");
+      borderCircle.setAttribute("stroke", "var(--oro)");
+      borderCircle.setAttribute("stroke-width", borderWidth);
+      wheelGroup.appendChild(borderCircle);
+
+      // 3.2) DIBUJAR CADA SECTOR (PATH + TEXTO)
+      prizes.forEach((prize, i) => {
+        // Ángulo inicial y final (en grados) para este sector
+        const startAngle = i * anglePerSegment;          // por ejemplo: 0, 60, 120, ...
+        const endAngle   = startAngle + anglePerSegment; // por ejemplo: 60, 120, 180, ...
+
+        // Convertimos a radianes para Math.cos/sin
+        const startRad = toRad(startAngle);
+        const endRad   = toRad(endAngle);
+
+        // Coordenadas del punto en el borde externo
+        const x1 = cx + radius * Math.cos(startRad);
+        const y1 = cy + radius * Math.sin(startRad);
+        const x2 = cx + radius * Math.cos(endRad);
+        const y2 = cy + radius * Math.sin(endRad);
+
+        // Path: M centro → L punto1 → arco → punto2 → Z
+        // "A radius,radius 0 0,1 x2,y2" dibuja un arco de circunferencia de startRad a endRad
+        const pathData = [
+          `M ${cx},${cy}`,
+          `L ${x1},${y1}`,
+          `A ${radius},${radius} 0 0,1 ${x2},${y2}`,
+          `Z`
+        ].join(" ");
+
+        // 3.2.1) Creamos el <path> del sector
+        const sectorPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        sectorPath.setAttribute("d", pathData);
+        sectorPath.setAttribute("fill", prize.bgColor);
+        sectorPath.setAttribute("stroke", "var(--oro)");
+        sectorPath.setAttribute("stroke-width", "1");
+        wheelGroup.appendChild(sectorPath);
+
+        // 3.2.2) Calcular el punto medio angular para colocar el texto siempre horizontal
+        // El “ángulo medio” es (startAngle + endAngle)/2
+        const midAngle = startAngle + anglePerSegment / 2;
+        const midRad   = toRad(midAngle);
+
+        // Elegimos un radio ligeramente menor para que el texto no choque con el borde
+        // Por ejemplo, a 90 px del centro (o sea, radius - 60)
+        const textRadius = radius - 60; 
+
+        // Coordenadas en las que se ubicará el texto (punto central radial de cada sector)
+        const textX = cx + textRadius * Math.cos(midRad);
+        const textY = cy + textRadius * Math.sin(midRad);
+
+        // 3.2.3) Creamos el <text> para el contenido del premio
+        const svgText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        svgText.textContent = prize.text;
+        svgText.setAttribute("x", textX);
+        svgText.setAttribute("y", textY);
+        svgText.setAttribute("fill", prize.textColor);
+        svgText.setAttribute("font-family", "Montserrat, sans-serif");
+        svgText.setAttribute("font-size", "14");
+        svgText.setAttribute("font-weight", "600");
+        svgText.setAttribute("text-anchor", "middle");
+        svgText.setAttribute("alignment-baseline", "middle");
+        // Para que el texto siempre esté horizontal, no lo rotamos; permanece a 0°.
+        wheelGroup.appendChild(svgText);
       });
     }
 
-    // Verificar email
-    function verifyEmail() {
-      const emailInput = document.getElementById('userEmail').value;
-      if (!emailInput.includes("@") || !emailInput.includes(".")) {
-        alert("Por favor, introduce un email válido");
-        return;
-      }
-      userEmail = emailInput;
-      document.getElementById('emailSection').style.display = "none";
-      document.getElementById('wheelSection').style.display = "block";
-      initWheel();
-    }
+    //////////////////////////////////////////////////////////////
+    // 4) INICIALIZAR RUEDA
+    //////////////////////////////////////////////////////////////
+    drawWheel();
 
-    // Girar ruleta
-    document.getElementById('spinBtn').addEventListener('click', function() {
+    //////////////////////////////////////////////////////////////
+    // 5) ANIMACIÓN DE GIRO
+    //////////////////////////////////////////////////////////////
+    let currentRotation = 0;  // Lleva el ángulo de rotación acumulado
+    let spinning = false;     // Para evitar múltiples clics simultáneos
+    const spinBtn = document.getElementById("spinBtn");
+
+    spinBtn.addEventListener("click", () => {
       if (spinning) return;
-      
       spinning = true;
-      const spinDuration = 4000;
-      const winnerIndex = Math.floor(Math.random() * prizes.length);
-      const targetRotation = currentRotation + 1800 + (winnerIndex * 60);
-      
+
+      // Elegimos un índice ganador al azar (de 0 a totalSegments-1)
+      const winnerIndex = Math.floor(Math.random() * totalSegments);
+      // Queremos que la flecha apunte exactamente al centro de ese sector cuando se detenga.
+      // El ángulo (en grados) del centro del sector ganador es:
+      //    centroSector = winnerIndex * anglePerSegment + anglePerSegment/2
+      const centerOfWinner = winnerIndex * anglePerSegment + anglePerSegment / 2;
+
+      // Para dar varias vueltas antes de detenernos, agregamos (por ejemplo) 3 vueltas completas = 3 * 360
+      const extraSpins = 3 * 360; 
+      // El ángulo final deseado (en grados) -- invertimos el signo porque giramos el <g> en sentido horario
+      const targetRotation = extraSpins + centerOfWinner;
+
+      // Duración de la animación en milisegundos
+      const duration = 4000; // 4 segundos
+
+      const startRotation = currentRotation;
       const startTime = Date.now();
-      
+
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
       function animate() {
         const now = Date.now();
         const elapsed = now - startTime;
-        const progress = Math.min(elapsed / spinDuration, 1);
-        const easeProgress = Math.pow(progress - 1, 3) + 1; // EaseOutCubic
-        
-        currentRotation = currentRotation + (easeProgress * (targetRotation - currentRotation));
-        wheel.style.transform = `rotate(${-currentRotation}deg)`;
-        wheel.style.transition = `transform ${spinDuration/1000}s cubic-bezier(0.17, 0.67, 0.21, 0.99)`;
-        
-        if (progress < 1) {
+        const t = Math.min(elapsed / duration, 1); // de 0 a 1
+        const easedT = easeOutCubic(t);
+
+        // Interpolamos entre el ángulo inicial y el final:
+        const newRotation = startRotation + (targetRotation - startRotation) * easedT;
+        currentRotation = newRotation;
+
+        // Aplicamos la rotación al grupo
+        wheelGroup.setAttribute("transform", `rotate(${-currentRotation} ${cx} ${cy})`);
+
+        if (t < 1) {
           requestAnimationFrame(animate);
         } else {
+          // Al terminar la animación, detenemos y mostramos alerta
           spinning = false;
           setTimeout(() => {
             alert(`¡Ganaste: ${prizes[winnerIndex].text}!`);
-          }, 500);
+          }, 200);
         }
       }
-      
-      animate();
+
+      requestAnimationFrame(animate);
     });
   </script>
 </body>
