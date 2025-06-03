@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ruleta Opera Maritim (SVG + Email + Oro con Degradado Lineal)</title>
+  <title>Ruleta Opera Maritim (SVG + Email + Oro con Borde Gradiente)</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --oro-plano: #d4af37; /* Color plano de oro para ajustes puntuales */
+      --oro-plano: #d4af37; /* Color plano de oro para casos puntuales */
       --negro: #111;
       --blanco: #f8f8f8;
     }
@@ -189,13 +189,13 @@
         wheelGroup.removeChild(wheelGroup.firstChild);
       }
 
-      // 3.1) DIBUJAR EL BORDE EXTERIOR DORADO (usando color plano)
+      // 3.1) DIBUJAR EL BORDE EXTERIOR DORADO (usando el mismo degradado lineal suave)
       const borderCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       borderCircle.setAttribute("cx", cx);
       borderCircle.setAttribute("cy", cy);
       borderCircle.setAttribute("r", radius + borderWidth / 2);
       borderCircle.setAttribute("fill", "none");
-      borderCircle.setAttribute("stroke", "var(--oro-plano)");
+      borderCircle.setAttribute("stroke", "url(#softGoldLinear)");
       borderCircle.setAttribute("stroke-width", borderWidth);
       wheelGroup.appendChild(borderCircle);
 
@@ -229,8 +229,8 @@
         } else {
           sectorPath.setAttribute("fill", prize.bgColor);
         }
-        // El borde de cada sector se dibuja en color plano dorado
-        sectorPath.setAttribute("stroke", "var(--oro-plano)");
+        // El borde de cada sector se dibuja con el mismo degradado lineal
+        sectorPath.setAttribute("stroke", "url(#softGoldLinear)");
         sectorPath.setAttribute("stroke-width", "1");
         wheelGroup.appendChild(sectorPath);
 
