@@ -128,14 +128,14 @@
     }
   </style>
 
-  <!-- +++ AQUÍ AÑADIMOS LAS LIBRERÍAS NECESARIAS +++ -->
+  <!-- +++ LIBRERÍAS NECESARIAS +++ -->
   <!-- 1) UUID para generar código único -->
   <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuidv4.min.js"></script>
   <!-- 2) EmailJS para enviar correo -->
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script>
-    // +++ IMPORTANTE: Sustituye con tu USER ID real de EmailJS +++
-    emailjs.init("YOUR_USER_ID_DE_EMAILJS");
+    // +++ IMPORTANTE: usar tu User ID real de EmailJS +++
+    emailjs.init("4KSxHkuk_apCg_kyS");
   </script>
 </head>
 <body>
@@ -167,7 +167,7 @@
               <stop offset="100%" stop-color="#8c6b1c" />  <!-- sombra profunda -->
             </linearGradient>
           </defs>
-          <!-- Aquí se insertará dinámicamente el <g id="wheelGroup"> -->
+          <!-- El <g> con id="wheelGroup" se insertará dinámicamente -->
         </svg>
       </div>
       <button class="spin-btn" id="spinBtn">GIRAR</button>
@@ -385,7 +385,6 @@
         const newRotation = startRotation + (targetRotation - startRotation) * easedT;
         currentRotation = newRotation;
 
-        // Rotar el <g> completo alrededor de (cx, cy)
         wheelGroup.setAttribute("transform", `rotate(${-currentRotation} ${cx} ${cy})`);
 
         if (t < 1) {
@@ -394,16 +393,30 @@
           spinning = false;
           const premioGanado = prizes[winnerIndex].text;
 
+          // Calcular fecha de expiración a 30 días
+          const expirationDate = new Date();
+          expirationDate.setDate(expirationDate.getDate() + 30);
+          const fechaStr = expirationDate.toLocaleDateString('es-ES'); // "dd/mm/yyyy"
+
+          // +++ LOG ANTES DE ENVIAR +++
+          console.log(
+            "🚀 Enviando email a:", userEmail,
+            "| Código:", couponCode,
+            "| Premio:", premioGanado,
+            "| Fecha expira:", fechaStr
+          );
+
           // +++ ENVÍO AUTOMÁTICO DE CORREO MEDIANTE EmailJS +++
-          emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
-            to_email:    userEmail,
-            coupon_code: couponCode,
-            prize_text:  premioGanado
+          emailjs.send('service_t4py4c5', 'template_sby6x8j', {
+            to_email: userEmail,
+            premio:   premioGanado,
+            codigo:   couponCode,
+            fecha:    fechaStr
           })
-          .then(() => {
-            console.log("Correo enviado a:", userEmail);
+          .then((resp) => {
+            console.log("✅ EmailJS dice OK:", resp);
           }, (err) => {
-            console.error("Error enviando email:", err);
+            console.error("🚨 EmailJS reporta error:", err);
           });
 
           // Mostrar solo aviso genérico de que el código está en el correo
