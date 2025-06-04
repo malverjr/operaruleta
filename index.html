@@ -132,7 +132,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuidv4.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-  <script>emailjs.init("YOUR_USER_ID_DE_EMAILJS");</script>
+  <script>emailjs.init("4KSxHkuk_apCg_kyS");</script>
 
   <script>
     const prizes = [
@@ -238,7 +238,7 @@
         } else {
           spinning = false;
           const prize = prizes[winnerIndex].text;
-          emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+          emailjs.send('service_t4py4c5', 'template_sby6x8j', {
             to_email: userEmail,
             coupon_code: couponCode,
             prize_text: prize
@@ -254,6 +254,4 @@
   </script>
 </body>
 </html>
-
-
 
