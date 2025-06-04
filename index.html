@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ruleta Opera Maritim (SVG + Email + Oro Realista)</title>
+  <title>Ruleta Opera Maritim (SVG + Email + Pulido de UI)</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-
   <style>
     :root {
       /* Degradado realista para el oro */
@@ -15,11 +14,8 @@
       --oro-4: #8c6b1c; /* sombra profunda */
       --negro: #111;
       --blanco: #f8f8f8;
-      --gris-toast: rgba(0,0,0,0.8);
-      --texto-toast: #f8f8f8;
-      --boton-toast: #caa86f;
+      --gris-texto: #aaa;
     }
-
     body {
       margin: 0;
       padding: 20px;
@@ -41,6 +37,7 @@
       margin: 20px 0;
     }
     h1 {
+      /* Título con degradado dorado existente (se conserva) */
       font-family: 'Playfair Display', serif;
       margin-bottom: 30px;
       background: linear-gradient(180deg,
@@ -67,15 +64,21 @@
       font-size: 16px;
     }
 
-    /* Sección de la ruleta (oculta al inicio) */
+    /* Sección de la rueda (oculta inicialmente) */
     #wheelSection {
       display: none;
+      position: relative;
     }
     .wheel-container {
       position: relative;
       width: 320px;
       height: 320px;
       margin: 30px auto;
+      transition: opacity 0.5s ease; /* para el fade-out */
+    }
+    /* cuando añadimos la clase .fade-out se desvanece */
+    .wheel-container.fade-out {
+      opacity: 0;
     }
     #wheelSvg {
       width: 100%;
@@ -88,6 +91,7 @@
       transform: translateX(-50%);
       width: 30px;
       height: 30px;
+      /* Puntero con degradado realista */
       background: linear-gradient(180deg,
         var(--oro-1) 0%,
         var(--oro-2) 30%,
@@ -98,6 +102,7 @@
       z-index: 2;
     }
     .spin-btn {
+      /* Botón con degradado realista */
       background: linear-gradient(180deg,
         var(--oro-1) 0%,
         var(--oro-2) 30%,
@@ -113,77 +118,84 @@
       cursor: pointer;
       font-family: 'Playfair Display', serif;
       margin-top: 20px;
+      transition: opacity 0.3s ease;
+    }
+    .spin-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
     .spin-btn:hover {
+      /* Variación sutil del degradado al pasar el cursor */
       background: linear-gradient(180deg,
         var(--oro-2) 0%,
         var(--oro-3) 50%,
         var(--oro-2) 100%
       );
     }
-
     .disclaimer {
       font-size: 12px;
-      color: #aaa;
+      color: var(--gris-texto);
       margin-top: 20px;
       line-height: 1.4;
     }
 
-    /* ————————————————
-       CUADRO NEGRO DE NOTIFICACIÓN (el “toast” EXACTO que pediste)
-       ———————————————— */
-    #blackToast {
-      position: fixed;
+    /* ----------------------------------------------------
+       2) ESTILOS PARA “Caja de resultado” (result box)
+       ---------------------------------------------------- */
+    .result-box {
+      position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background-color: var(--gris-toast);
-      padding: 20px 30px;
+      width: 280px;
+      background-color: rgba(0, 0, 0, 0.9);
       border-radius: 8px;
-      color: var(--texto-toast);
-      max-width: 90%;
-      width: 320px;
-      font-family: 'Montserrat', sans-serif;
-      display: none; /* oculto por defecto */
-      z-index: 9999;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+      color: var(--blanco);
       text-align: center;
+      font-family: 'Montserrat', sans-serif;
+      opacity: 0;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      z-index: 5;
     }
-    #blackToast h2 {
-      margin: 0 0 12px 0;
-      font-size: 18px;
-      font-weight: bold;
+    .result-box.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
     }
-    #blackToast p {
-      margin: 6px 0;
+    .result-box h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      background: linear-gradient(180deg,
+        var(--oro-1) 0%,
+        var(--oro-2) 50%,
+        var(--oro-1) 100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .result-box p {
+      margin: 8px 0;
       font-size: 14px;
+      line-height: 1.4;
     }
-    #blackToast button {
-      margin-top: 12px;
+    .result-box .close-btn {
+      margin-top: 15px;
       background: none;
-      border: 1px solid var(--boton-toast);
-      color: var(--boton-toast);
-      padding: 6px 16px;
-      border-radius: 4px;
+      border: 1px solid var(--oro-3);
+      color: var(--oro-3);
+      padding: 8px 16px;
       cursor: pointer;
-      font-size: 14px;
+      border-radius: 4px;
+      font-weight: 600;
+      transition: background 0.3s ease, color 0.3s ease;
     }
-    #blackToast button:hover {
-      background-color: var(--boton-toast);
+    .result-box .close-btn:hover {
+      background: var(--oro-3);
       color: var(--negro);
     }
   </style>
-
-  <!-- +++ LIBRERÍAS NECESARIAS +++ -->
-  <!-- 1) UUID para generar códigos únicos -->
-  <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuidv4.min.js"></script>
-  <!-- 2) EmailJS para enviar correo -->
-  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-  <script>
-    // +++ IMPORTANTE: tu User ID real de EmailJS +++
-    emailjs.init("4KSxHkuk_apCg_kyS");
-  </script>
 </head>
-
 <body>
   <div class="container">
     <img src="https://operamaritim.com/wp-content/uploads/2025/01/logotipo-opera-maritim-blanco.png"
@@ -191,30 +203,40 @@
 
     <h1>¡Gira y descubre tu premio!</h1>
 
-    <!-- ⇒ SECCIÓN PARA INTRODUCIR EMAIL ⇐ -->
+    <!-- Sección para introducir email -->
     <div id="emailSection">
       <p>Introduce tu email para participar:</p>
       <input type="email" id="userEmail" class="email-input" placeholder="tucorreo@ejemplo.com">
-      <button class="spin-btn" id="continueBtn" onclick="verifyEmail()">CONTINUAR</button>
+      <button class="spin-btn" onclick="verifyEmail()">CONTINUAR</button>
     </div>
 
-    <!-- ⇒ SECCIÓN DE LA RULETA (oculta hasta email OK) ⇐ -->
+    <!-- Sección de la rueda (oculta hasta que el email sea válido) -->
     <div id="wheelSection">
-      <div class="wheel-container">
+      <div class="wheel-container" id="wheelContainer">
         <div class="pointer"></div>
-        <!-- SVG con gradiente dorado dentro -->
+
+        <!-- SVG para la ruleta con degradado realista -->
         <svg id="wheelSvg" viewBox="0 0 320 320">
           <defs>
+            <!-- Degradado lineal realista para los sectores dorados -->
             <linearGradient id="realGold" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%"   stop-color="#f8e9a1" />
-              <stop offset="30%"  stop-color="#f1d360" />
-              <stop offset="60%"  stop-color="#d4af37" />
-              <stop offset="100%" stop-color="#8c6b1c" />
+              <stop offset="0%"   stop-color="#f8e9a1" />  <!-- punto más claro -->
+              <stop offset="30%"  stop-color="#f1d360" />  <!-- intermedio suave -->
+              <stop offset="60%"  stop-color="#d4af37" />  <!-- tono medio auténtico -->
+              <stop offset="100%" stop-color="#8c6b1c" />  <!-- sombra profunda -->
             </linearGradient>
           </defs>
-          <!-- <g id="wheelGroup"> se agrega dinámicamente desde JS -->
         </svg>
+
+        <!-- RESULT BOX: se mostrará tras la tirada -->
+        <div class="result-box" id="resultBox">
+          <h2>🎉 ¡Enhorabuena! 🎉</h2>
+          <p id="resultMessage">Has ganado <strong>PREMIO</strong>. 🔔</p>
+          <p>Revisa tu correo (spam incluido). <br>Tu cupón te espera en unos segundos.</p>
+          <button class="close-btn" onclick="closeResultBox()">Cerrar</button>
+        </div>
       </div>
+
       <button class="spin-btn" id="spinBtn">GIRAR</button>
     </div>
 
@@ -225,63 +247,54 @@
     </p>
   </div>
 
-  <!-- ————————————————
-       CUADRO NEGRO DE NOTIFICACIÓN (EL “TOAST” EXACTO)
-       ———————————————— -->
-  <div id="blackToast">
-    <h2 id="toastTitle">¡Felicitaciones!</h2>
-    <p id="toastMessage1">Has ganado: “<span id="toastPrize"></span>”.</p>
-    <p id="toastMessage2">Revisa tu correo con tu código: <strong id="toastCode"></strong>.</p>
-    <button onclick="closeToast()">Aceptar</button>
-  </div>
-
 
   <script>
-    ////////////////////////////////////////////////
+    ///////////////////////////////////////////////////
     // 1) CONFIGURACIÓN DE PREMIOS Y PARÁMETROS
-    ////////////////////////////////////////////////
+    ///////////////////////////////////////////////////
+
     const prizes = [
-      { text: "POSTRE GRATIS",   bgColor: "gradGold", textColor: "#111" },
-      { text: "10% DESCUENTO",   bgColor: "#111",     textColor: "#f8f8f8" },
-      { text: "CAFÉ GRATIS",     bgColor: "gradGold", textColor: "#111" },
-      { text: "5% DESCUENTO",    bgColor: "#111",     textColor: "#f8f8f8" },
-      { text: "BEBIDA GRATIS",   bgColor: "gradGold", textColor: "#111" },
-      { text: "15% DESCUENTO",   bgColor: "#111",     textColor: "#f8f8f8" }
+      // Sectores dorados con degradado realista ("gradGold"), sectores negros con "#111"
+      { text: "POSTRE GRATIS",     bgColor: "gradGold", textColor: "#111" },
+      { text: "10% DESCUENTO",     bgColor: "#111",     textColor: "#f8f8f8" },
+      { text: "CAFÉ GRATIS",       bgColor: "gradGold", textColor: "#111" },
+      { text: "5% DESCUENTO",      bgColor: "#111",     textColor: "#f8f8f8" },
+      { text: "BEBIDA GRATIS",     bgColor: "gradGold", textColor: "#111" },
+      { text: "15% DESCUENTO",     bgColor: "#111",     textColor: "#f8f8f8" }
     ];
 
     const svgSize = 320;
-    const cx = svgSize / 2;
-    const cy = svgSize / 2;
-    const radius = 150;
-    const borderWidth = 10;
+    const cx = svgSize / 2;   // 160
+    const cy = svgSize / 2;   // 160
+    const radius = 150;       // radio de la rueda
+    const borderWidth = 10;   // grosor del borde exterior
 
-    const totalSegments = prizes.length;
-    const anglePerSegment = 360 / totalSegments;
+    const totalSegments = prizes.length;            // 6
+    const anglePerSegment = 360 / totalSegments;    // 60°
 
-    // Referencias al SVG y su contenedor <g>
     const wheelSvg = document.getElementById("wheelSvg");
     const wheelGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
     wheelGroup.setAttribute("id", "wheelGroup");
     wheelGroup.setAttribute("transform", `rotate(0 ${cx} ${cy})`);
     wheelSvg.appendChild(wheelGroup);
 
-    ////////////////////////////////////////////////
-    // 2) FUNC. AUXILIAR: grados → radianes
-    ////////////////////////////////////////////////
+    ///////////////////////////////////////////////////
+    // 2) FUNCIÓN PARA CONVERTIR GRADOS A RADIANES
+    ///////////////////////////////////////////////////
     function toRad(deg) {
       return (deg * Math.PI) / 180;
     }
 
-    ////////////////////////////////////////////////
-    // 3) DIBUJAR LA RULETA
-    ////////////////////////////////////////////////
+    ///////////////////////////////////////////////////
+    // 3) FUNCIÓN PARA DIBUJAR LA RUEDA COMPLETA
+    ///////////////////////////////////////////////////
     function drawWheel() {
-      // Limpiar todo lo anterior
+      // Limpiar cualquier contenido previo
       while (wheelGroup.firstChild) {
         wheelGroup.removeChild(wheelGroup.firstChild);
       }
 
-      // 3.1) Círculo exterior dorado
+      // 3.1) DIBUJAR EL BORDE EXTERIOR DORADO (usando el mismo degradado realista)
       const borderCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       borderCircle.setAttribute("cx", cx);
       borderCircle.setAttribute("cy", cy);
@@ -291,10 +304,11 @@
       borderCircle.setAttribute("stroke-width", borderWidth);
       wheelGroup.appendChild(borderCircle);
 
-      // 3.2) Cada sector + texto
+      // 3.2) DIBUJAR CADA SECTOR Y SU TEXTO
       prizes.forEach((prize, i) => {
-        const startAngle = i * anglePerSegment;
-        const endAngle   = startAngle + anglePerSegment;
+        const startAngle = i * anglePerSegment;          // 0, 60, 120, ...
+        const endAngle   = startAngle + anglePerSegment; // 60, 120, 180, ...
+
         const startRad = toRad(startAngle);
         const endRad   = toRad(endAngle);
 
@@ -310,31 +324,37 @@
           `Z`
         ].join(" ");
 
+        // Crear <path> del sector
         const sectorPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
         sectorPath.setAttribute("d", pathData);
+
+        // Si bgColor es "gradGold", usamos el degradado realista; si no, negro plano
         if (prize.bgColor === "gradGold") {
           sectorPath.setAttribute("fill", "url(#realGold)");
         } else {
           sectorPath.setAttribute("fill", prize.bgColor);
         }
+        // El borde de cada sector se dibuja con el mismo degradado realista
         sectorPath.setAttribute("stroke", "url(#realGold)");
         sectorPath.setAttribute("stroke-width", "1");
         wheelGroup.appendChild(sectorPath);
 
-        // Texto del premio
-        const midAngle = startAngle + anglePerSegment / 2;
+        // Calcular ángulo medio para colocar el texto
+        const midAngle = startAngle + anglePerSegment / 2; // e.g. 30, 90, 150, ...
         const midRad   = toRad(midAngle);
-        const textRadius = radius - 60;
+        const textRadius = radius - 60; // alejamos el texto del borde exterior
+
         const textX = cx + textRadius * Math.cos(midRad);
         const textY = cy + textRadius * Math.sin(midRad);
 
+        // Crear <text> y ubicarlo en (textX, textY)
         const svgText = document.createElementNS("http://www.w3.org/2000/svg", "text");
         svgText.textContent = prize.text;
         svgText.setAttribute("x", textX);
         svgText.setAttribute("y", textY);
         svgText.setAttribute("fill", prize.textColor);
         svgText.setAttribute("font-family", "Montserrat, sans-serif");
-        svgText.setAttribute("font-size", "10");
+        svgText.setAttribute("font-size", "10");        // Tamaño pequeño para encajar
         svgText.setAttribute("font-weight", "600");
         svgText.setAttribute("text-anchor", "middle");
         svgText.setAttribute("alignment-baseline", "middle");
@@ -342,93 +362,47 @@
       });
     }
 
-    ////////////////////////////////////////////////
-    // 4) VARIABLES GLOBALES
-    ////////////////////////////////////////////////
-    let userEmail  = ""; // email ingresado
-    let couponCode = ""; // código generado
-
-    ////////////////////////////////////////////////
-    // 5) VERIFICAR EMAIL (primera llamada)
-    ////////////////////////////////////////////////
-    async function verifyEmail() {
+    ///////////////////////////////////////////////////
+    // 4) FUNCIÓN PARA VERIFICAR EMAIL Y MOSTRAR RUEDA
+    ///////////////////////////////////////////////////
+    function verifyEmail() {
       const emailInput = document.getElementById('userEmail').value.trim();
       if (!emailInput.includes("@") || !emailInput.includes(".")) {
         alert("Por favor, introduce un email válido");
         return;
       }
-
-      // 5.1) Cambiar el botón a icono de reloj de arena y deshabilitar
-      const btn = document.getElementById("continueBtn");
-      btn.disabled = true;
-      btn.innerHTML = "⏳"; // icono de reloj de arena
-
-      userEmail = emailInput;
-      couponCode = uuidv4().slice(0, 8).toUpperCase();
-
-      try {
-        // Llamada a tu endpoint serverless (/api/check-email)
-        const resp = await fetch('/api/check-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email:      userEmail,
-            couponCode: couponCode
-          })
-        });
-        const data = await resp.json();
-
-        if (data.error) {
-          console.error("Error desde Vercel:", data.error);
-          alert("Ha ocurrido un error interno. Inténtalo más tarde.");
-          btn.disabled = false;
-          btn.innerHTML = "CONTINUAR";
-          return;
-        }
-        if (data.already) {
-          alert("Ya has participado con este email. Tu código ya fue enviado a tu correo.");
-          btn.disabled = false;
-          btn.innerHTML = "CONTINUAR";
-          return;
-        }
-
-        // Si es válido por primera vez, ocultar formulario y mostrar ruleta
-        document.getElementById('emailSection').style.display = "none";
-        document.getElementById('wheelSection').style.display = "block";
-        drawWheel();
-
-      } catch (err) {
-        console.error("Error en verifyEmail():", err);
-        alert("Problema de conexión. Vuelve a intentarlo en unos segundos.");
-        btn.disabled = false;
-        btn.innerHTML = "CONTINUAR";
-      }
+      // Ocultar sección de email y mostrar la rueda
+      document.getElementById('emailSection').style.display = "none";
+      document.getElementById('wheelSection').style.display = "block";
+      // Dibujamos la rueda SVG
+      drawWheel();
     }
 
-    ////////////////////////////////////////////////
-    // 6) GIRO DE RULETA Y SEGUNDA LLAMADA
-    ////////////////////////////////////////////////
+    ///////////////////////////////////////////////////
+    // 5) ANIMACIÓN DE GIRO + RESULT BOX + FETCH
+    ///////////////////////////////////////////////////
     let currentRotation = 0;
     let spinning = false;
     const spinBtn = document.getElementById("spinBtn");
-
-    // ————————————————
-    // Pega aquí EXACTAMENTE la URL que obtuviste de “Implementar → Gestionar implementaciones”
-    // Así:
-    // const APPS_SCRIPT_URL = "https://script.google.com/macros/s/XXXXXXXXXXXXX/exec";
-    const APPS_SCRIPT_URL = "TU_APPS_SCRIPT_URL_AQUÍ";
+    const wheelContainer = document.getElementById("wheelContainer");
+    const resultBox = document.getElementById("resultBox");
+    const resultMessage = document.getElementById("resultMessage");
 
     spinBtn.addEventListener("click", () => {
       if (spinning) return;
       spinning = true;
+      spinBtn.disabled = true; // bloqueamos el botón para que no vuelvan a tocarlo
 
-      const winnerIndex    = Math.floor(Math.random() * totalSegments);
+      // Elegimos índice aleatorio del ganador
+      const winnerIndex = Math.floor(Math.random() * totalSegments);
       const centerOfWinner = winnerIndex * anglePerSegment + anglePerSegment / 2;
-      const extraSpins     = 3 * 360;
+
+      // Añadimos 3 vueltas completas (3 * 360°) y sumamos 90° para alinear la flecha
+      const extraSpins = 3 * 360;
       const targetRotation = extraSpins + centerOfWinner + 90;
 
-      const duration  = 4000;
-      const startRot  = currentRotation;
+      const duration = 4000;
+      const startRotation = currentRotation;
       const startTime = Date.now();
 
       function easeOutCubic(t) {
@@ -436,84 +410,126 @@
       }
 
       function animate() {
-        const now     = Date.now();
+        const now = Date.now();
         const elapsed = now - startTime;
-        const t       = Math.min(elapsed / duration, 1);
-        const easedT  = easeOutCubic(t);
+        const t = Math.min(elapsed / duration, 1);
+        const easedT = easeOutCubic(t);
 
-        const newRotation = startRot + (targetRotation - startRot) * easedT;
-        currentRotation   = newRotation;
+        const newRotation = startRotation + (targetRotation - startRotation) * easedT;
+        currentRotation = newRotation;
+
+        // Rotar el <g> completo alrededor de (cx, cy)
         wheelGroup.setAttribute("transform", `rotate(${-currentRotation} ${cx} ${cy})`);
 
         if (t < 1) {
           requestAnimationFrame(animate);
         } else {
-          // Aquí termina la animación
-          const premioGanado = prizes[winnerIndex].text;
-
-          // 6.1) Calcular fecha de expiración local en formato “YYYY-MM-DD”
-          const expiration = new Date();
-          expiration.setDate(expiration.getDate() + 30);
-          const yyyy = expiration.getFullYear();
-          const mm   = String(expiration.getMonth() + 1).padStart(2, '0');
-          const dd   = String(expiration.getDate()).padStart(2, '0');
-          const expirationISO = `${yyyy}-${mm}-${dd}`; // “2025-07-04”
-
-          // 6.2) Enviar correo con EmailJS
-          emailjs.send('service_t4py4c5', 'template_sby6x8j', {
-            to_email: userEmail,
-            premio:   premioGanado,
-            codigo:   couponCode,
-            fecha:    expiration.toLocaleDateString('es-ES') // “dd/mm/yyyy”
-          })
-          .then((resp) => {
-            console.log("✅ EmailJS OK:", resp);
-          }, (err) => {
-            console.error("🚨 EmailJS Error:", err);
-          });
-
-          // 6.3) Segunda llamada a Apps Script para insertar Prize y ExpirationDate
-          fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email:          userEmail,
-              couponCode:     couponCode,
-              prizeText:      premioGanado,
-              expirationDate: expirationISO
-            })
-          })
-          .then(res => res.json())
-          .then(json => {
-            if (json.error) {
-              console.error("Error actualizando en Apps Script:", json.error);
-            } else if (json.updated) {
-              console.log("✅ Hoja actualizada con Prize y ExpirationDate.");
-            } else {
-              console.warn("Respuesta inesperada de Apps Script:", json);
-            }
-          })
-          .catch(err => {
-            console.error("Fetch a Apps Script falló:", err);
-          });
-
-          // 6.4) Mostrar el cuadro negro (“blackToast”) con el mensaje
-          document.getElementById("toastPrize").innerText = premioGanado;
-          document.getElementById("toastCode").innerText  = couponCode;
-          document.getElementById("blackToast").style.display = "block";
-
-          spinning = false;
+          // Termina la animación
+          setTimeout(() => {
+            const prizeText = prizes[winnerIndex].text;
+            showResultBox(prizeText);
+            sendDataToSheet(prizeText);
+          }, 200);
         }
       }
 
       requestAnimationFrame(animate);
     });
 
-    // Función para cerrar el toast negro
-    function closeToast() {
-      document.getElementById("blackToast").style.display = "none";
+    ///////////////////////////////////////////////////
+    // 6) MOSTRAR “RESULT BOX” CON FADE-IN
+    ///////////////////////////////////////////////////
+    function showResultBox(prizeText) {
+      // Hacemos fade-out de la rueda
+      wheelContainer.classList.add("fade-out");
+      // Preparamos el mensaje
+      resultMessage.innerHTML = `Has ganado <strong>${prizeText}</strong> 🎁`;
+      // Mostramos la caja de resultado con un pequeño delay para que termine el fade-out
+      setTimeout(() => {
+        resultBox.classList.add("show");
+      }, 400);
     }
+    function closeResultBox() {
+      // Opción para cerrar la caja y dejar la ruleta oculta permanentemente
+      resultBox.classList.remove("show");
+      // ya no permitimos volver a girar, así que no volvemos a mostrar la rueda
+    }
+
+    ///////////////////////////////////////////////////
+    // 7) ENVÍO AL SERVIDOR (Google Sheets) VIA FETCH
+    ///////////////////////////////////////////////////
+    function sendDataToSheet(prizeText) {
+      const email = document.getElementById("userEmail").value.trim();
+      const couponCode = generateCouponCode();
+      const today = new Date();
+      // Formateamos fecha de caducidad a 30 días vista (formato 2025-07-04)
+      const expirationDateObj = new Date(today);
+      expirationDateObj.setDate(expirationDateObj.getDate() + 30);
+      const yyyy = expirationDateObj.getFullYear();
+      const mm = String(expirationDateObj.getMonth() + 1).padStart(2, "0");
+      const dd = String(expirationDateObj.getDate()).padStart(2, "0");
+      const expirationDate = `${yyyy}-${mm}-${dd}`;
+
+      // Enviar a tu endpoint /api/check-email
+      fetch("https://operaruleta.vercel.app/api/check-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email,
+          couponCode: couponCode,
+          prizeText: prizeText,
+          expirationDate: expirationDate
+        })
+      })
+      .then(res => res.json())
+      .then(json => {
+        console.log("✅ Registro guardado en Sheet:", json);
+        // Si quieres, podrías mostrar algún mensaje extra o loguear el estado final aquí
+      })
+      .catch(err => {
+        console.error("❌ Error guardando en Sheet:", err);
+      });
+
+      // En paralelo, enviamos el email al usuario usando EmailJS
+      // (suponiendo que ya hayas importado emailjs SDK correctamente en otra parte)
+      if (typeof emailjs !== "undefined") {
+        emailjs.send("service_t4py4c5", "template_sby6x8j", {
+          to_email: email,
+          premio: prizeText,
+          codigo: couponCode,
+          fecha: `${dd}/${mm}/${yyyy}`
+        }, "4KSxHkuk_apCg_kyS")
+        .then(resp => {
+          console.log("Test EmailJS OK:", resp);
+        }, err => {
+          console.error("Test EmailJS FALLÓ:", err);
+        });
+      }
+    }
+
+    ///////////////////////////////////////////////////
+    // 8) GENERADOR SIMPLE DE CÓDIGO ALFA-NUMÉRICO
+    ///////////////////////////////////////////////////
+    function generateCouponCode() {
+      // 8 caracteres alfanum
+      const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let code = "";
+      for (let i = 0; i < 8; i++) {
+        code += charset.charAt(Math.floor(Math.random() * charset.length));
+      }
+      return code;
+    }
+
+  </script>
+
+  <!-- IMPORTANTE: asegúrate de incluir el SDK de EmailJS justo antes del cierre de </body>, así: -->
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js">
+  </script>
+  <script type="text/javascript">
+    (function(){
+      emailjs.init("4KSxHkuk_apCg_kyS"); // tu Public Key de EmailJS
+    })();
   </script>
 </body>
 </html>
-
