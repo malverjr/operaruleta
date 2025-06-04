@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ruleta Opera Maritim (SVG + Email + Pulido de UI)</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
   <style>
     :root {
       /* Degradado realista para el oro */
@@ -16,6 +17,7 @@
       --blanco: #f8f8f8;
       --gris-texto: #aaa;
     }
+
     body {
       margin: 0;
       padding: 20px;
@@ -28,14 +30,17 @@
       flex-direction: column;
       align-items: center;
     }
+
     .container {
       max-width: 500px;
       width: 100%;
     }
+
     .logo {
       width: 180px;
       margin: 20px 0;
     }
+
     h1 {
       /* Título con degradado dorado existente (se conserva) */
       font-family: 'Playfair Display', serif;
@@ -49,10 +54,13 @@
       -webkit-text-fill-color: transparent;
     }
 
-    /* Sección de email */
+    /* ——————————————
+       SECCIÓN EMAIL
+       —————————————— */
     #emailSection {
       display: block;
     }
+
     .email-input {
       width: 80%;
       padding: 12px;
@@ -64,11 +72,14 @@
       font-size: 16px;
     }
 
-    /* Sección de la rueda (oculta inicialmente) */
+    /* ——————————————
+       SECCIÓN RULETA
+       —————————————— */
     #wheelSection {
       display: none;
       position: relative;
     }
+
     .wheel-container {
       position: relative;
       width: 320px;
@@ -76,14 +87,17 @@
       margin: 30px auto;
       transition: opacity 0.5s ease; /* para el fade-out */
     }
-    /* cuando añadimos la clase .fade-out se desvanece */
+
+    /* cuando agregamos la clase .fade-out, la ruleta se desvanece */
     .wheel-container.fade-out {
       opacity: 0;
     }
+
     #wheelSvg {
       width: 100%;
       height: 100%;
     }
+
     .pointer {
       position: absolute;
       top: -10px;
@@ -101,6 +115,7 @@
       clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
       z-index: 2;
     }
+
     .spin-btn {
       /* Botón con degradado realista */
       background: linear-gradient(180deg,
@@ -120,18 +135,21 @@
       margin-top: 20px;
       transition: opacity 0.3s ease;
     }
+
     .spin-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
+
     .spin-btn:hover {
-      /* Variación sutil del degradado al pasar el cursor */
+      /* Variación sutil del degradado */
       background: linear-gradient(180deg,
         var(--oro-2) 0%,
         var(--oro-3) 50%,
         var(--oro-2) 100%
       );
     }
+
     .disclaimer {
       font-size: 12px;
       color: var(--gris-texto);
@@ -139,9 +157,9 @@
       line-height: 1.4;
     }
 
-    /* ----------------------------------------------------
-       2) ESTILOS PARA “Caja de resultado” (result box)
-       ---------------------------------------------------- */
+    /* ————————————————
+       RESULT BOX (ahora FUERA de .wheel-container)
+       ———————————————— */
     .result-box {
       position: absolute;
       top: 50%;
@@ -159,10 +177,12 @@
       transition: opacity 0.4s ease, transform 0.4s ease;
       z-index: 5;
     }
+
     .result-box.show {
       opacity: 1;
       transform: translate(-50%, -50%) scale(1);
     }
+
     .result-box h2 {
       margin: 0 0 10px;
       font-size: 20px;
@@ -174,11 +194,13 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
+
     .result-box p {
       margin: 8px 0;
       font-size: 14px;
       line-height: 1.4;
     }
+
     .result-box .close-btn {
       margin-top: 15px;
       background: none;
@@ -190,12 +212,14 @@
       font-weight: 600;
       transition: background 0.3s ease, color 0.3s ease;
     }
+
     .result-box .close-btn:hover {
       background: var(--oro-3);
       color: var(--negro);
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <img src="https://operamaritim.com/wp-content/uploads/2025/01/logotipo-opera-maritim-blanco.png"
@@ -203,39 +227,42 @@
 
     <h1>¡Gira y descubre tu premio!</h1>
 
-    <!-- Sección para introducir email -->
+    <!-- ⇒ SECCIÓN PARA INTRODUCIR EMAIL ⇐ -->
     <div id="emailSection">
       <p>Introduce tu email para participar:</p>
       <input type="email" id="userEmail" class="email-input" placeholder="tucorreo@ejemplo.com">
       <button class="spin-btn" onclick="verifyEmail()">CONTINUAR</button>
     </div>
 
-    <!-- Sección de la rueda (oculta hasta que el email sea válido) -->
+    <!-- ⇒ SECCIÓN DE LA RULETA (oculta hasta email OK) ⇐ -->
     <div id="wheelSection">
       <div class="wheel-container" id="wheelContainer">
         <div class="pointer"></div>
 
-        <!-- SVG para la ruleta con degradado realista -->
+        <!-- SVG para la ruleta -->
         <svg id="wheelSvg" viewBox="0 0 320 320">
           <defs>
-            <!-- Degradado lineal realista para los sectores dorados -->
             <linearGradient id="realGold" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%"   stop-color="#f8e9a1" />  <!-- punto más claro -->
-              <stop offset="30%"  stop-color="#f1d360" />  <!-- intermedio suave -->
-              <stop offset="60%"  stop-color="#d4af37" />  <!-- tono medio auténtico -->
-              <stop offset="100%" stop-color="#8c6b1c" />  <!-- sombra profunda -->
+              <stop offset="0%"   stop-color="#f8e9a1" />
+              <stop offset="30%"  stop-color="#f1d360" />
+              <stop offset="60%"  stop-color="#d4af37" />
+              <stop offset="100%" stop-color="#8c6b1c" />
             </linearGradient>
           </defs>
+          <!-- <g id="wheelGroup"> se inyecta dinámicamente -->
         </svg>
-
-        <!-- RESULT BOX: se mostrará tras la tirada -->
-        <div class="result-box" id="resultBox">
-          <h2>🎉 ¡Enhorabuena! 🎉</h2>
-          <p id="resultMessage">Has ganado <strong>PREMIO</strong>. 🔔</p>
-          <p>Revisa tu correo (spam incluido). <br>Tu cupón te espera en unos segundos.</p>
-          <button class="close-btn" onclick="closeResultBox()">Cerrar</button>
-        </div>
       </div>
+
+      <!-- ****************************************************************
+           A PARTIR DE AQUÍ HE SACADO el result-box FUERA de .wheel-container
+           **************************************************************** -->
+      <div class="result-box" id="resultBox">
+        <h2>🎉 ¡Enhorabuena! 🎉</h2>
+        <p id="resultMessage">Has ganado <strong>PREMIO</strong> 🎁</p>
+        <p>Revisa tu correo (spam incluido).<br>Tu cupón te espera en unos segundos.</p>
+        <button class="close-btn" onclick="closeResultBox()">Cerrar</button>
+      </div>
+      <!-- ************************************************************************ -->
 
       <button class="spin-btn" id="spinBtn">GIRAR</button>
     </div>
@@ -247,20 +274,18 @@
     </p>
   </div>
 
-
   <script>
     ///////////////////////////////////////////////////
     // 1) CONFIGURACIÓN DE PREMIOS Y PARÁMETROS
     ///////////////////////////////////////////////////
 
     const prizes = [
-      // Sectores dorados con degradado realista ("gradGold"), sectores negros con "#111"
-      { text: "POSTRE GRATIS",     bgColor: "gradGold", textColor: "#111" },
-      { text: "10% DESCUENTO",     bgColor: "#111",     textColor: "#f8f8f8" },
-      { text: "CAFÉ GRATIS",       bgColor: "gradGold", textColor: "#111" },
-      { text: "5% DESCUENTO",      bgColor: "#111",     textColor: "#f8f8f8" },
-      { text: "BEBIDA GRATIS",     bgColor: "gradGold", textColor: "#111" },
-      { text: "15% DESCUENTO",     bgColor: "#111",     textColor: "#f8f8f8" }
+      { text: "POSTRE GRATIS",   bgColor: "gradGold", textColor: "#111" },
+      { text: "10% DESCUENTO",   bgColor: "#111",     textColor: "#f8f8f8" },
+      { text: "CAFÉ GRATIS",     bgColor: "gradGold", textColor: "#111" },
+      { text: "5% DESCUENTO",    bgColor: "#111",     textColor: "#f8f8f8" },
+      { text: "BEBIDA GRATIS",   bgColor: "gradGold", textColor: "#111" },
+      { text: "15% DESCUENTO",   bgColor: "#111",     textColor: "#f8f8f8" }
     ];
 
     const svgSize = 320;
@@ -272,29 +297,30 @@
     const totalSegments = prizes.length;            // 6
     const anglePerSegment = 360 / totalSegments;    // 60°
 
-    const wheelSvg = document.getElementById("wheelSvg");
-    const wheelGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    // Referencias al SVG y su <g>
+    const wheelSvg    = document.getElementById("wheelSvg");
+    const wheelGroup  = document.createElementNS("http://www.w3.org/2000/svg", "g");
     wheelGroup.setAttribute("id", "wheelGroup");
     wheelGroup.setAttribute("transform", `rotate(0 ${cx} ${cy})`);
     wheelSvg.appendChild(wheelGroup);
 
     ///////////////////////////////////////////////////
-    // 2) FUNCIÓN PARA CONVERTIR GRADOS A RADIANES
+    // 2) FUNCIÓN AUXILIAR: grados → radianes
     ///////////////////////////////////////////////////
     function toRad(deg) {
       return (deg * Math.PI) / 180;
     }
 
     ///////////////////////////////////////////////////
-    // 3) FUNCIÓN PARA DIBUJAR LA RUEDA COMPLETA
+    // 3) DIBUJAR LA RUEDA COMPLETA
     ///////////////////////////////////////////////////
     function drawWheel() {
-      // Limpiar cualquier contenido previo
+      // Limpiar contenido previo
       while (wheelGroup.firstChild) {
         wheelGroup.removeChild(wheelGroup.firstChild);
       }
 
-      // 3.1) DIBUJAR EL BORDE EXTERIOR DORADO (usando el mismo degradado realista)
+      // 3.1) Círculo exterior dorado
       const borderCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       borderCircle.setAttribute("cx", cx);
       borderCircle.setAttribute("cy", cy);
@@ -304,7 +330,7 @@
       borderCircle.setAttribute("stroke-width", borderWidth);
       wheelGroup.appendChild(borderCircle);
 
-      // 3.2) DIBUJAR CADA SECTOR Y SU TEXTO
+      // 3.2) Cada sector + texto
       prizes.forEach((prize, i) => {
         const startAngle = i * anglePerSegment;          // 0, 60, 120, ...
         const endAngle   = startAngle + anglePerSegment; // 60, 120, 180, ...
@@ -324,37 +350,32 @@
           `Z`
         ].join(" ");
 
-        // Crear <path> del sector
         const sectorPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
         sectorPath.setAttribute("d", pathData);
 
-        // Si bgColor es "gradGold", usamos el degradado realista; si no, negro plano
         if (prize.bgColor === "gradGold") {
           sectorPath.setAttribute("fill", "url(#realGold)");
         } else {
           sectorPath.setAttribute("fill", prize.bgColor);
         }
-        // El borde de cada sector se dibuja con el mismo degradado realista
         sectorPath.setAttribute("stroke", "url(#realGold)");
         sectorPath.setAttribute("stroke-width", "1");
         wheelGroup.appendChild(sectorPath);
 
-        // Calcular ángulo medio para colocar el texto
-        const midAngle = startAngle + anglePerSegment / 2; // e.g. 30, 90, 150, ...
+        // Texto del premio
+        const midAngle = startAngle + anglePerSegment / 2;
         const midRad   = toRad(midAngle);
-        const textRadius = radius - 60; // alejamos el texto del borde exterior
-
+        const textRadius = radius - 60;
         const textX = cx + textRadius * Math.cos(midRad);
         const textY = cy + textRadius * Math.sin(midRad);
 
-        // Crear <text> y ubicarlo en (textX, textY)
         const svgText = document.createElementNS("http://www.w3.org/2000/svg", "text");
         svgText.textContent = prize.text;
         svgText.setAttribute("x", textX);
         svgText.setAttribute("y", textY);
         svgText.setAttribute("fill", prize.textColor);
         svgText.setAttribute("font-family", "Montserrat, sans-serif");
-        svgText.setAttribute("font-size", "10");        // Tamaño pequeño para encajar
+        svgText.setAttribute("font-size", "10");
         svgText.setAttribute("font-weight", "600");
         svgText.setAttribute("text-anchor", "middle");
         svgText.setAttribute("alignment-baseline", "middle");
@@ -371,15 +392,15 @@
         alert("Por favor, introduce un email válido");
         return;
       }
-      // Ocultar sección de email y mostrar la rueda
+      // Ocultar sección de email y mostrar la sección de ruleta
       document.getElementById('emailSection').style.display = "none";
       document.getElementById('wheelSection').style.display = "block";
-      // Dibujamos la rueda SVG
+      // Dibujamos la ruleta SVG
       drawWheel();
     }
 
     ///////////////////////////////////////////////////
-    // 5) ANIMACIÓN DE GIRO + RESULT BOX + FETCH
+    // 5) ANIMACIÓN DE GIRO + MOSTRAR RESULT BOX
     ///////////////////////////////////////////////////
     let currentRotation = 0;
     let spinning = false;
@@ -391,13 +412,13 @@
     spinBtn.addEventListener("click", () => {
       if (spinning) return;
       spinning = true;
-      spinBtn.disabled = true; // bloqueamos el botón para que no vuelvan a tocarlo
+      spinBtn.disabled = true; // bloqueamos el botón para que no vuelvan a hacer click
 
       // Elegimos índice aleatorio del ganador
       const winnerIndex = Math.floor(Math.random() * totalSegments);
       const centerOfWinner = winnerIndex * anglePerSegment + anglePerSegment / 2;
 
-      // Añadimos 3 vueltas completas (3 * 360°) y sumamos 90° para alinear la flecha
+      // Añadimos 3 vueltas completas (3 * 360°) + 90° para alinear la flecha
       const extraSpins = 3 * 360;
       const targetRotation = extraSpins + centerOfWinner + 90;
 
@@ -424,7 +445,7 @@
         if (t < 1) {
           requestAnimationFrame(animate);
         } else {
-          // Termina la animación
+          // Termina la animación → mostramos el result box
           setTimeout(() => {
             const prizeText = prizes[winnerIndex].text;
             showResultBox(prizeText);
@@ -437,81 +458,83 @@
     });
 
     ///////////////////////////////////////////////////
-    // 6) MOSTRAR “RESULT BOX” CON FADE-IN
+    // 6) MOSTRAR “RESULT BOX” + CERRAR
     ///////////////////////////////////////////////////
     function showResultBox(prizeText) {
-      // Hacemos fade-out de la rueda
+      // 6.1) Hacemos fade-out de la ruleta (solo el contenedor .wheel-container)
       wheelContainer.classList.add("fade-out");
-      // Preparamos el mensaje
+
+      // 6.2) Preparamos el mensaje dentro del result box
       resultMessage.innerHTML = `Has ganado <strong>${prizeText}</strong> 🎁`;
-      // Mostramos la caja de resultado con un pequeño delay para que termine el fade-out
+
+      // 6.3) Mostramos la caja de resultado con un leve retraso (para que termine el fade-out)
       setTimeout(() => {
         resultBox.classList.add("show");
       }, 400);
     }
+
     function closeResultBox() {
-      // Opción para cerrar la caja y dejar la ruleta oculta permanentemente
+      // Simplemente ocultamos la caja; la ruleta queda permanentemente oculta.
       resultBox.classList.remove("show");
-      // ya no permitimos volver a girar, así que no volvemos a mostrar la rueda
+      // — no volvemos a mostrar .wheel-container ni permitimos reiniciar —
     }
 
     ///////////////////////////////////////////////////
-    // 7) ENVÍO AL SERVIDOR (Google Sheets) VIA FETCH
+    // 7) ENVÍO AL SERVIDOR (Google Sheets) / EMAILJS
     ///////////////////////////////////////////////////
     function sendDataToSheet(prizeText) {
       const email = document.getElementById("userEmail").value.trim();
       const couponCode = generateCouponCode();
       const today = new Date();
-      // Formateamos fecha de caducidad a 30 días vista (formato 2025-07-04)
+
+      // 7.1) Calculamos fecha de caducidad a 30 días (formato YYYY-MM-DD)
       const expirationDateObj = new Date(today);
       expirationDateObj.setDate(expirationDateObj.getDate() + 30);
       const yyyy = expirationDateObj.getFullYear();
       const mm = String(expirationDateObj.getMonth() + 1).padStart(2, "0");
       const dd = String(expirationDateObj.getDate()).padStart(2, "0");
-      const expirationDate = `${yyyy}-${mm}-${dd}`;
+      const expirationDate = `${yyyy}-${mm}-${dd}`; // ej. "2025-07-04"
 
-      // Enviar a tu endpoint /api/check-email
-      fetch("https://operaruleta.vercel.app/api/check-email", {
+      // 7.2) Llamada POST a tu API /api/check-email para insertar/updating en Google Sheets
+      fetch("/api/check-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: email,
-          couponCode: couponCode,
-          prizeText: prizeText,
+          email:          email,
+          couponCode:     couponCode,
+          prizeText:      prizeText,
           expirationDate: expirationDate
         })
       })
       .then(res => res.json())
       .then(json => {
-        console.log("✅ Registro guardado en Sheet:", json);
-        // Si quieres, podrías mostrar algún mensaje extra o loguear el estado final aquí
+        console.log("✅ Registro guardado en Sheets:", json);
       })
       .catch(err => {
-        console.error("❌ Error guardando en Sheet:", err);
+        console.error("❌ Error guardando en Sheets:", err);
       });
 
-      // En paralelo, enviamos el email al usuario usando EmailJS
-      // (suponiendo que ya hayas importado emailjs SDK correctamente en otra parte)
+      // 7.3) En paralelo, envío de correo con EmailJS
+      // (asegúrate de importar emailjs en la parte inferior; está justo antes del </body>)
       if (typeof emailjs !== "undefined") {
         emailjs.send("service_t4py4c5", "template_sby6x8j", {
           to_email: email,
-          premio: prizeText,
-          codigo: couponCode,
-          fecha: `${dd}/${mm}/${yyyy}`
-        }, "4KSxHkuk_apCg_kyS")
+          premio:   prizeText,
+          codigo:   couponCode,
+          fecha:    `${dd}/${mm}/${yyyy}`
+        })
         .then(resp => {
-          console.log("Test EmailJS OK:", resp);
+          console.log("✅ EmailJS OK:", resp);
         }, err => {
-          console.error("Test EmailJS FALLÓ:", err);
+          console.error("🚨 EmailJS FALLÓ:", err);
         });
       }
     }
 
     ///////////////////////////////////////////////////
-    // 8) GENERADOR SIMPLE DE CÓDIGO ALFA-NUMÉRICO
+    // 8) GENERAR CÓDIGO ALFA-NUMÉRICO 8 CARACTERES
     ///////////////////////////////////////////////////
     function generateCouponCode() {
-      // 8 caracteres alfanum
       const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
       let code = "";
       for (let i = 0; i < 8; i++) {
@@ -519,13 +542,10 @@
       }
       return code;
     }
-
   </script>
 
-  <!-- IMPORTANTE: asegúrate de incluir el SDK de EmailJS justo antes del cierre de </body>, así: -->
-  <script type="text/javascript"
-    src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js">
-  </script>
+  <!-- IMPORTANTE: incluyes el SDK de EmailJS justo antes del cierre de </body> -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script type="text/javascript">
     (function(){
       emailjs.init("4KSxHkuk_apCg_kyS"); // tu Public Key de EmailJS
