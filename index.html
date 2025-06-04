@@ -7,13 +7,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --oro-1: #f8e9a1;
-      --oro-2: #f1d360;
-      --oro-3: #d4af37;
-      --oro-4: #8c6b1c;
-      --negro: #111;
-      --blanco: #f8f8f8;
-    }
+  --oro-1: #fff8d3; /* punto más claro, casi blanco cálido */
+  --oro-2: #f5dc85; /* tono crema dorado intermedio */
+  --oro-3: #e0b64b; /* dorado principal realista */
+  --oro-4: #a0781c; /* sombra profunda más elegante */
+  --negro: #111;
+  --blanco: #f8f8f8;
+}
     body {
       margin: 0;
       padding: 20px;
@@ -152,11 +152,12 @@
         <svg id="wheelSvg" viewBox="0 0 320 320">
           <defs>
             <linearGradient id="realGold" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#f8e9a1" />
-              <stop offset="30%" stop-color="#f1d360" />
-              <stop offset="60%" stop-color="#d4af37" />
-              <stop offset="100%" stop-color="#8c6b1c" />
-            </linearGradient>
+  <stop offset="0%"   stop-color="#fff8d3" />   <!-- punto más claro -->
+  <stop offset="30%"  stop-color="#f5dc85" />   <!-- crema intermedio -->
+  <stop offset="60%"  stop-color="#e0b64b" />   <!-- dorado principal -->
+  <stop offset="100%" stop-color="#a0781c" />   <!-- sombra profunda -->
+</linearGradient>
+
           </defs>
         </svg>
       </div>
