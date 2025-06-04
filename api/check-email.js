@@ -1,3 +1,5 @@
+import https from 'https';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
@@ -8,26 +10,43 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Faltan campos' });
   }
 
-  const SHEETS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwmrNUOgJUYa0Tu1KsuKJHEKovfymB9aMajCUOXb1-80JzDnGOAUvLEo3puUc1m_O9P_w/exec';
+  const SHEETS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwmNU0gJUYa0Tu1KsWJkJHEKovfymB9aMajCU0Xb1-80JzDn6GAUVLEo3puUc1m_09P_w/exec';
 
-  try {
-    const response = await fetch(SHEETS_WEBAPP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, couponCode })
-    });
+  const payload = JSON.stringify({ email, couponCode });
 
-    const data = await response.json();
+  const url = new URL(SHEETS_WEBAPP_URL);
 
-    if (data.error) {
-      console.error("⚠️ Error en respuesta de Apps Script:", data.error);
-      return res.status(500).json({ error: data.error });
+  const options = {
+    hostname: url.hostname,
+    path: url.pathname + url.search,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(payload)
     }
+  };
 
-    return res.status(200).json({ already: data.already || false });
+  const request = https.request(options, response => {
+    let data = '';
+    response.on('data', chunk => { data += chunk; });
+    response.on('end', () => {
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed.error) {
+          return res.status(500).json({ error: parsed.error });
+        }
+        return res.status(200).json({ already: parsed.already || false });
+      } catch (err) {
+        return res.status(500).json({ error: 'Respuesta inválida del servidor de Sheets.' });
+      }
+    });
+  });
 
-  } catch (err) {
-    console.error("❌ Error conectando a Google Sheets:", err);
-    return res.status(500).json({ error: 'Error interno al conectar con Sheets' });
-  }
+  request.on('error', (err) => {
+    console.error('❌ Error HTTPS:', err);
+    return res.status(500).json({ error: 'Error de conexión con Google Sheets' });
+  });
+
+  request.write(payload);
+  request.end();
 }
