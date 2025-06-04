@@ -127,6 +127,16 @@
       line-height: 1.4;
     }
   </style>
+
+  <!-- +++ AQUÍ AÑADIMOS LAS LIBRERÍAS NECESARIAS +++ -->
+  <!-- 1) UUID para generar código único -->
+  <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuidv4.min.js"></script>
+  <!-- 2) EmailJS para enviar correo -->
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    // +++ IMPORTANTE: Sustituye con tu USER ID real de EmailJS +++
+    emailjs.init("YOUR_USER_ID_DE_EMAILJS");
+  </script>
 </head>
 <body>
   <div class="container">
@@ -157,6 +167,7 @@
               <stop offset="100%" stop-color="#8c6b1c" />  <!-- sombra profunda -->
             </linearGradient>
           </defs>
+          <!-- Aquí se insertará dinámicamente el <g id="wheelGroup"> -->
         </svg>
       </div>
       <button class="spin-btn" id="spinBtn">GIRAR</button>
@@ -193,6 +204,7 @@
     const totalSegments = prizes.length;            // 6
     const anglePerSegment = 360 / totalSegments;    // 60°
 
+    // Referencias al SVG y su <g> contenedor
     const wheelSvg = document.getElementById("wheelSvg");
     const wheelGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
     wheelGroup.setAttribute("id", "wheelGroup");
@@ -284,23 +296,62 @@
     }
 
     ////////////////////////////////////////////////
-    // 4) FUNCIÓN PARA VERIFICAR EMAIL Y MOSTRAR RUEDA
+    // 4) VARIABLES GLOBALES PARA EMAIL Y CUPÓN
     ////////////////////////////////////////////////
-    function verifyEmail() {
-      const emailInput = document.getElementById('userEmail').value;
+    let userEmail  = "";  // Guardará el email ingresado
+    let couponCode = "";  // Guardará el código generado
+
+    ////////////////////////////////////////////////
+    // 5) FUNCIÓN PARA VERIFICAR EMAIL Y MOSTRAR RUEDA
+    ////////////////////////////////////////////////
+    async function verifyEmail() {
+      const emailInput = document.getElementById('userEmail').value.trim();
+      // Validación básica de formato
       if (!emailInput.includes("@") || !emailInput.includes(".")) {
         alert("Por favor, introduce un email válido");
         return;
       }
-      // Ocultar sección de email y mostrar la rueda
-      document.getElementById('emailSection').style.display = "none";
-      document.getElementById('wheelSection').style.display = "block";
-      // Dibujamos la rueda SVG
-      drawWheel();
+
+      // Generar un código único de 8 caracteres con uuidv4()
+      userEmail  = emailInput;
+      couponCode = uuidv4().slice(0, 8).toUpperCase();
+
+      try {
+        // +++ Llamada a tu endpoint serverless que revisa el email en Google Sheets +++
+        const resp = await fetch('https://operaruleta.vercel.app/api/check-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email:      userEmail,
+            couponCode: couponCode
+          })
+        });
+        const data = await resp.json();
+
+        // Si la API devolvió un error (por ejemplo, pestaña no encontrada)
+        if (data.error) {
+          console.error("Error desde el servidor:", data.error);
+          alert("Ha ocurrido un error interno. Inténtalo más tarde.");
+          return;
+        }
+        // Si el email ya participó antes, cancelamos el flujo
+        if (data.already) {
+          alert("Ya has participado con este email. ¡Gracias por tu interés!");
+          return;
+        }
+
+        // Si es la primera vez, ocultamos el formulario y mostramos la ruleta
+        document.getElementById('emailSection').style.display = "none";
+        document.getElementById('wheelSection').style.display = "block";
+        drawWheel();
+      } catch (err) {
+        console.error("Error en verifyEmail():", err);
+        alert("Problema de conexión. Vuelve a intentarlo en unos segundos.");
+      }
     }
 
     ////////////////////////////////////////////////
-    // 5) ANIMACIÓN DE GIRO
+    // 6) ANIMACIÓN DE GIRO Y ENVÍO DE EMAIL
     ////////////////////////////////////////////////
     let currentRotation = 0;
     let spinning = false;
@@ -310,26 +361,26 @@
       if (spinning) return;
       spinning = true;
 
-      const winnerIndex = Math.floor(Math.random() * totalSegments);
-      const centerOfWinner = winnerIndex * anglePerSegment + anglePerSegment / 2;
+      const winnerIndex     = Math.floor(Math.random() * totalSegments);
+      const centerOfWinner  = winnerIndex * anglePerSegment + anglePerSegment / 2;
 
-      // Añadimos 3 vueltas completas (3 * 360°) y compensamos con +90°
-      const extraSpins = 3 * 360;
+      // Hacemos 3 vueltas completas (3 * 360°) + 90° para que el puntero quede encima del sector correcto
+      const extraSpins    = 3 * 360;
       const targetRotation = extraSpins + centerOfWinner + 90;
 
-      const duration = 4000;
-      const startRotation = currentRotation;
-      const startTime = Date.now();
+      const duration       = 4000;
+      const startRotation  = currentRotation;
+      const startTime      = Date.now();
 
       function easeOutCubic(t) {
         return 1 - Math.pow(1 - t, 3);
       }
 
       function animate() {
-        const now = Date.now();
+        const now     = Date.now();
         const elapsed = now - startTime;
-        const t = Math.min(elapsed / duration, 1);
-        const easedT = easeOutCubic(t);
+        const t       = Math.min(elapsed / duration, 1);
+        const easedT  = easeOutCubic(t);
 
         const newRotation = startRotation + (targetRotation - startRotation) * easedT;
         currentRotation = newRotation;
@@ -341,8 +392,23 @@
           requestAnimationFrame(animate);
         } else {
           spinning = false;
+          const premioGanado = prizes[winnerIndex].text;
+
+          // +++ ENVÍO AUTOMÁTICO DE CORREO MEDIANTE EmailJS +++
+          emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+            to_email:    userEmail,
+            coupon_code: couponCode,
+            prize_text:  premioGanado
+          })
+          .then(() => {
+            console.log("Correo enviado a:", userEmail);
+          }, (err) => {
+            console.error("Error enviando email:", err);
+          });
+
+          // Mostrar alerta con el resultado
           setTimeout(() => {
-            alert(`¡Ganaste: ${prizes[winnerIndex].text}!`);
+            alert(`¡Ganaste: ${premioGanado}!\nTu código es: ${couponCode}`);
           }, 200);
         }
       }
