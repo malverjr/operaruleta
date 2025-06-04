@@ -14,6 +14,7 @@
       --oro-4: #8c6b1c; /* sombra profunda */
       --negro: #111;
       --blanco: #f8f8f8;
+      --gris-trans: rgba(0, 0, 0, 0.8);
     }
     body {
       margin: 0;
@@ -126,6 +127,31 @@
       margin-top: 20px;
       line-height: 1.4;
     }
+
+    /* Box de resultado tras girar (fade-in) */
+    #resultBox {
+      display: none;
+      opacity: 0;
+      background-color: var(--gris-trans);
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 30px;
+      transition: opacity 0.5s ease;
+    }
+    #resultBox.visible {
+      display: block;
+      opacity: 1;
+    }
+    #resultBox h2 {
+      margin: 0 0 10px;
+      color: var(--oro-2);
+      font-size: 20px;
+      font-family: 'Playfair Display', serif;
+    }
+    #resultBox p {
+      margin: 8px 0;
+      font-size: 16px;
+    }
   </style>
 
   <!-- +++ LIBRERÍAS NECESARIAS +++ -->
@@ -171,6 +197,14 @@
         </svg>
       </div>
       <button class="spin-btn" id="spinBtn">GIRAR</button>
+    </div>
+
+    <!-- Box que aparecerá tras girar y completar animación -->
+    <div id="resultBox">
+      <h2>¡Felicidades!</h2>
+      <p id="resultPrize">Has obtenido: <strong></strong></p>
+      <p>Tu cupón ha sido enviado a tu correo.</p>
+      <p><small>Revisa tu carpeta de spam si no lo ves.</small></p>
     </div>
 
     <p class="disclaimer">
@@ -351,7 +385,20 @@
     }
 
     ////////////////////////////////////////////////
-    // 6) ANIMACIÓN DE GIRO Y ENVÍO DE EMAIL
+    // 6) FUNCIÓN AUXILIAR: OBTENER FECHA DE EXPIRACIÓN +30 DÍAS EN ISO
+    ////////////////////////////////////////////////
+    function getExpirationDateISO() {
+      const now = new Date();
+      now.setDate(now.getDate() + 30);
+      // ISO (YYYY-MM-DD)
+      const year  = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day   = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    ////////////////////////////////////////////////
+    // 7) ANIMACIÓN DE GIRO, ENVÍO DE EMAIL Y REGISTRO A GOOGLE SHEETS
     ////////////////////////////////////////////////
     let currentRotation = 0;
     let spinning = false;
@@ -390,28 +437,48 @@
         if (t < 1) {
           requestAnimationFrame(animate);
         } else {
-          spinning = false;
-          const premioGanado = prizes[winnerIndex].text;
+          // Fin de animación
+          const premioGanado     = prizes[winnerIndex].text;
+          const expirationISO    = getExpirationDateISO();           // Ej: "2025-07-04"
+          const expirationLocale = new Date(expirationISO).toLocaleDateString('es-ES'); // Ej: "04/07/2025"
 
-          // Calcular fecha de expiración a 30 días
-          const expirationDate = new Date();
-          expirationDate.setDate(expirationDate.getDate() + 30);
-          const fechaStr = expirationDate.toLocaleDateString('es-ES'); // "dd/mm/yyyy"
-
-          // +++ LOG ANTES DE ENVIAR +++
+          // +++ LOG EN CONSOLA +++
           console.log(
-            "🚀 Enviando email a:", userEmail,
+            "🚀 Registrando en Sheets y enviando email a:", userEmail,
             "| Código:", couponCode,
             "| Premio:", premioGanado,
-            "| Fecha expira:", fechaStr
+            "| Expira:", expirationISO
           );
 
-          // +++ ENVÍO AUTOMÁTICO DE CORREO MEDIANTE EmailJS +++
+          // 7.1) Enviar a Google Sheets vía Apps Script (doPost)
+          fetch('https://script.google.com/macros/s/AKfycbzA0CLDVXChEDH9C6pBpd3LmugoFkga4Peacnvx6Y--9ziCPg44JTFKMs3xIsjB7mXiRw/exec', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email:          userEmail,
+              couponCode:     couponCode,
+              prizeText:      premioGanado,
+              expirationDate: expirationISO
+            })
+          })
+          .then(res => res.json())
+          .then(responseData => {
+            if (responseData.error) {
+              console.error("Error desde Apps Script:", responseData.error);
+            } else {
+              console.log("✅ Registro exitoso en Sheets:", responseData);
+            }
+          })
+          .catch(err => {
+            console.error("🚨 Error al llamar Apps Script:", err);
+          });
+
+          // 7.2) Enviar correo con EmailJS
           emailjs.send('service_t4py4c5', 'template_sby6x8j', {
             to_email: userEmail,
             premio:   premioGanado,
             codigo:   couponCode,
-            fecha:    fechaStr
+            fecha:    expirationLocale
           })
           .then((resp) => {
             console.log("✅ EmailJS dice OK:", resp);
@@ -419,10 +486,24 @@
             console.error("🚨 EmailJS reporta error:", err);
           });
 
-          // Mostrar solo aviso genérico de que el código está en el correo
+          // 7.3) Mostrar box de resultado con fade-out de la ruleta
           setTimeout(() => {
-            alert(`¡Felicidades! Tu premio (“${premioGanado}”) y tu código han sido enviados a tu correo.`);
-          }, 200);
+            // Desvanecer la sección de la rueda
+            const wheelSec = document.getElementById('wheelSection');
+            wheelSec.style.transition = 'opacity 0.5s ease';
+            wheelSec.style.opacity = '0';
+
+            // Tras un corto delay, ocultamos la rueda y mostramos el resultado
+            setTimeout(() => {
+              wheelSec.style.display = 'none';
+
+              // Mostrar resultBox con mensaje
+              const resultBox   = document.getElementById('resultBox');
+              const prizeP      = document.getElementById('resultPrize');
+              prizeP.querySelector('strong').textContent = premioGanado;
+              resultBox.classList.add('visible');
+            }, 500);
+          }, 200); // Pequeño delay tras finalizar animación
         }
       }
 
