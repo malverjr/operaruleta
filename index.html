@@ -175,15 +175,12 @@
     <div id="emailSection">
       <p>Introduce tu email para participar:</p>
       <input type="email" id="userEmail" class="email-input" placeholder="tucorreo@ejemplo.com">
-      <button class="spin-btn" onclick="verifyEmail()" id="continueBtn">
-        <span id="continueLabel">CONTINUAR</span>
-        <span id="spinner" style="display:none;">⏳</span>
-      </button>
+      <button class="spin-btn" onclick="verifyEmail()">CONTINUAR</button>
     </div>
 
     <!-- Sección de la rueda (oculta hasta que el email sea válido) -->
     <div id="wheelSection">
-      <div class="wheel-container" id="wheelContainer">
+      <div class="wheel-container">
         <div class="pointer"></div>
         <!-- SVG para la ruleta con degradado realista -->
         <svg id="wheelSvg" viewBox="0 0 320 320">
@@ -340,22 +337,12 @@
 
     ////////////////////////////////////////////////
     // 5) FUNCIÓN PARA VERIFICAR EMAIL Y MOSTRAR RUEDA
-    //    (LLAMA A VEREL API: /api/check-email)
     ////////////////////////////////////////////////
     async function verifyEmail() {
-      // Mostrar spinner y deshabilitar botón
-      document.getElementById("continueLabel").style.display = "none";
-      document.getElementById("spinner").style.display = "inline-block";
-      document.getElementById("continueBtn").disabled = true;
-
       const emailInput = document.getElementById('userEmail').value.trim();
       // Validación básica de formato
       if (!emailInput.includes("@") || !emailInput.includes(".")) {
         alert("Por favor, introduce un email válido");
-        // Ocultar spinner y habilitar botón
-        document.getElementById("spinner").style.display = "none";
-        document.getElementById("continueLabel").style.display = "inline";
-        document.getElementById("continueBtn").disabled = false;
         return;
       }
 
@@ -364,32 +351,30 @@
       couponCode = uuidv4().slice(0, 8).toUpperCase();
 
       try {
-        // >>> LLAMADA A API de Vercel (check-email) <<<
-        const resp = await fetch('https://operaruleta.vercel.app/api/check-email', {
+        // Llamada a tu endpoint Apps Script (directo a script.google.com)
+        const resp = await fetch('https://script.google.com/macros/s/AKfycbzA0CLDVXChEDH9C6pBpd3LmugoFkga4Peacnvx6Y--9ziCPg44JTFKMs3xIsjB7mXiRw/exec', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email:      userEmail,
-            couponCode: couponCode
+            couponCode: couponCode,
+            // Como en esta validación aún no giró la ruleta, 
+            // no enviamos prizeText ni expirationDate. 
+            // El Apps Script solo comprueba email y couponCode en esta fase.
+            prizeText:      "",
+            expirationDate: ""
           })
         });
         const data = await resp.json();
 
-        // Ocultar spinner y habilitar botón (en ambos casos)
-        document.getElementById("spinner").style.display = "none";
-        document.getElementById("continueLabel").style.display = "inline";
-        document.getElementById("continueBtn").disabled = false;
-
-        // Si la API devolvió un error (por ejemplo, pestaña no encontrada)
         if (data.error) {
           console.error("Error desde el servidor:", data.error);
           alert("Ha ocurrido un error interno. Inténtalo más tarde.");
           return;
         }
-        // Si el email ya participó antes, cancelamos el flujo y mostramos solo aviso
         if (data.already) {
           alert("Ya has participado con este email. Tu código ya fue enviado a tu correo.");
-          return; // +++ Evitamos que se muestre la ruleta +++
+          return;
         }
 
         // Si es la primera vez, ocultamos el formulario y mostramos la ruleta
@@ -399,10 +384,6 @@
       } catch (err) {
         console.error("Error en verifyEmail():", err);
         alert("Problema de conexión. Vuelve a intentarlo en unos segundos.");
-        // Ocultar spinner y habilitar botón
-        document.getElementById("spinner").style.display = "none";
-        document.getElementById("continueLabel").style.display = "inline";
-        document.getElementById("continueBtn").disabled = false;
       }
     }
 
@@ -433,7 +414,7 @@
       const winnerIndex     = Math.floor(Math.random() * totalSegments);
       const centerOfWinner  = winnerIndex * anglePerSegment + anglePerSegment / 2;
 
-      // Hacemos 3 vueltas completas (3 * 360°) + 90° para que el puntero quede encima del sector correcto
+      // Hacemos 3 vueltas completas (3 * 360°) + 90° para alinear con la flecha
       const extraSpins    = 3 * 360;
       const targetRotation = extraSpins + centerOfWinner + 90;
 
@@ -461,10 +442,10 @@
         } else {
           // Fin de animación
           const premioGanado     = prizes[winnerIndex].text;
-          const expirationISO    = getExpirationDateISO();           // Ej: "2025-07-04"
-          const expirationLocale = new Date(expirationISO).toLocaleDateString('es-ES'); // Ej: "04/07/2025"
+          const expirationISO    = getExpirationDateISO();           // "YYYY-MM-DD"
+          const expirationLocale = new Date(expirationISO).toLocaleDateString('es-ES'); // "dd/mm/yyyy"
 
-          // +++ LOG EN CONSOLA +++
+          // Log para depuración
           console.log(
             "🚀 Registrando en Sheets y enviando email a:", userEmail,
             "| Código:", couponCode,
@@ -472,7 +453,7 @@
             "| Expira:", expirationISO
           );
 
-          // 7.1) Enviar a Google Sheets vía Apps Script (doPost)
+          // 7.1) Registrar en Google Sheets vía Apps Script
           fetch('https://script.google.com/macros/s/AKfycbzA0CLDVXChEDH9C6pBpd3LmugoFkga4Peacnvx6Y--9ziCPg44JTFKMs3xIsjB7mXiRw/exec', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -503,9 +484,9 @@
             fecha:    expirationLocale
           })
           .then((resp) => {
-            console.log("✅ EmailJS dice OK:", resp);
+            console.log("✅ EmailJS OK:", resp);
           }, (err) => {
-            console.error("🚨 EmailJS reporta error:", err);
+            console.error("🚨 EmailJS ERROR:", err);
           });
 
           // 7.3) Mostrar box de resultado con fade-out de la ruleta
@@ -534,3 +515,4 @@
   </script>
 </body>
 </html>
+
