@@ -340,6 +340,7 @@
 
     ////////////////////////////////////////////////
     // 5) FUNCIÓN PARA VERIFICAR EMAIL Y MOSTRAR RUEDA
+    //    (LLAMA A VEREL API: /api/check-email)
     ////////////////////////////////////////////////
     async function verifyEmail() {
       // Mostrar spinner y deshabilitar botón
@@ -363,8 +364,8 @@
       couponCode = uuidv4().slice(0, 8).toUpperCase();
 
       try {
-        // +++ Llamada a tu endpoint serverless (Apps Script) que revisa el email en Google Sheets +++
-        const resp = await fetch('https://script.google.com/macros/s/AKfycbzA0CLDVXChEDH9C6pBpd3LmugoFkga4Peacnvx6Y--9ziCPg44JTFKMs3xIsjB7mXiRw/exec', {
+        // >>> LLAMADA A API de Vercel (check-email) <<<
+        const resp = await fetch('https://operaruleta.vercel.app/api/check-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -379,7 +380,7 @@
         document.getElementById("continueLabel").style.display = "inline";
         document.getElementById("continueBtn").disabled = false;
 
-        // Si la API devolvió un error (por ej. pestaña no encontrada)
+        // Si la API devolvió un error (por ejemplo, pestaña no encontrada)
         if (data.error) {
           console.error("Error desde el servidor:", data.error);
           alert("Ha ocurrido un error interno. Inténtalo más tarde.");
@@ -388,7 +389,7 @@
         // Si el email ya participó antes, cancelamos el flujo y mostramos solo aviso
         if (data.already) {
           alert("Ya has participado con este email. Tu código ya fue enviado a tu correo.");
-          return; // +++ Aquí evitamos que se muestre la ruleta +++
+          return; // +++ Evitamos que se muestre la ruleta +++
         }
 
         // Si es la primera vez, ocultamos el formulario y mostramos la ruleta
