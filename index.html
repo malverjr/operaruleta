@@ -334,10 +334,10 @@
           alert("Ha ocurrido un error interno. Inténtalo más tarde.");
           return;
         }
-        // Si el email ya participó antes, cancelamos el flujo
+        // Si el email ya participó antes, cancelamos el flujo y mostramos solo aviso
         if (data.already) {
-          alert("Ya has participado con este email. ¡Gracias por tu interés!");
-          return;
+          alert("Ya has participado con este email. Tu código ya fue enviado a tu correo.");
+          return; // +++ Aquí evitamos que se muestre la ruleta +++
         }
 
         // Si es la primera vez, ocultamos el formulario y mostramos la ruleta
@@ -406,9 +406,9 @@
             console.error("Error enviando email:", err);
           });
 
-          // Mostrar alerta con el resultado
+          // Mostrar solo aviso genérico de que el código está en el correo
           setTimeout(() => {
-            alert(`¡Ganaste: ${premioGanado}!\nTu código es: ${couponCode}`);
+            alert(`¡Felicidades! Tu premio (“${premioGanado}”) y tu código han sido enviados a tu correo.`);
           }, 200);
         }
       }
