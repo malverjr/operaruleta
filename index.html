@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ruleta Opera Maritim (SVG + Email + Oro Realista)</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
   <style>
     :root {
       /* Degradado realista para el oro */
@@ -14,7 +15,6 @@
       --oro-4: #8c6b1c; /* sombra profunda */
       --negro: #111;
       --blanco: #f8f8f8;
-      --gris-trans: rgba(0, 0, 0, 0.8);
     }
     body {
       margin: 0;
@@ -37,7 +37,6 @@
       margin: 20px 0;
     }
     h1 {
-      /* Título con degradado dorado existente (se conserva) */
       font-family: 'Playfair Display', serif;
       margin-bottom: 30px;
       background: linear-gradient(180deg,
@@ -48,7 +47,6 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-
     /* Sección de email */
     #emailSection {
       display: block;
@@ -64,7 +62,7 @@
       font-size: 16px;
     }
 
-    /* Sección de la rueda oculta inicialmente */
+    /* Sección de la ruleta oculta inicialmente */
     #wheelSection {
       display: none;
     }
@@ -85,7 +83,6 @@
       transform: translateX(-50%);
       width: 30px;
       height: 30px;
-      /* Puntero con degradado realista */
       background: linear-gradient(180deg,
         var(--oro-1) 0%,
         var(--oro-2) 30%,
@@ -96,7 +93,6 @@
       z-index: 2;
     }
     .spin-btn {
-      /* Botón con degradado realista */
       background: linear-gradient(180deg,
         var(--oro-1) 0%,
         var(--oro-2) 30%,
@@ -114,7 +110,6 @@
       margin-top: 20px;
     }
     .spin-btn:hover {
-      /* Variación sutil del degradado al pasar el cursor */
       background: linear-gradient(180deg,
         var(--oro-2) 0%,
         var(--oro-3) 50%,
@@ -127,29 +122,25 @@
       margin-top: 20px;
       line-height: 1.4;
     }
-
-    /* Box de resultado tras girar (fade-in) */
+    /* Box que aparece al terminar la ruleta */
     #resultBox {
       display: none;
-      opacity: 0;
-      background-color: var(--gris-trans);
-      padding: 20px;
+      margin: 30px auto;
+      background-color: #222;
+      border: 2px solid var(--oro-3);
       border-radius: 8px;
-      margin-top: 30px;
-      transition: opacity 0.5s ease;
-    }
-    #resultBox.visible {
-      display: block;
-      opacity: 1;
+      padding: 20px;
+      max-width: 400px;
+      text-align: center;
     }
     #resultBox h2 {
-      margin: 0 0 10px;
       color: var(--oro-2);
-      font-size: 20px;
+      font-size: 22px;
+      margin-bottom: 10px;
       font-family: 'Playfair Display', serif;
     }
     #resultBox p {
-      margin: 8px 0;
+      color: var(--blanco);
       font-size: 16px;
     }
   </style>
@@ -160,10 +151,11 @@
   <!-- 2) EmailJS para enviar correo -->
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script>
-    // +++ IMPORTANTE: usar tu User ID real de EmailJS +++
+    // +++ IMPORTANTE: tu User ID real de EmailJS +++
     emailjs.init("4KSxHkuk_apCg_kyS");
   </script>
 </head>
+
 <body>
   <div class="container">
     <img src="https://operamaritim.com/wp-content/uploads/2025/01/logotipo-opera-maritim-blanco.png"
@@ -175,39 +167,34 @@
     <div id="emailSection">
       <p>Introduce tu email para participar:</p>
       <input type="email" id="userEmail" class="email-input" placeholder="tucorreo@ejemplo.com">
-      <button class="spin-btn" onclick="verifyEmail()" id="continueBtn">
-        <span id="continueLabel">CONTINUAR</span>
-        <span id="spinner" style="display:none;">⏳</span>
-      </button>
+      <button class="spin-btn" onclick="verifyEmail()">CONTINUAR</button>
     </div>
 
-    <!-- Sección de la rueda (oculta hasta que el email sea válido) -->
+    <!-- Sección de la ruleta (oculta hasta que el email sea válido) -->
     <div id="wheelSection">
-      <div class="wheel-container" id="wheelContainer">
+      <div class="wheel-container">
         <div class="pointer"></div>
         <!-- SVG para la ruleta con degradado realista -->
         <svg id="wheelSvg" viewBox="0 0 320 320">
           <defs>
-            <!-- Degradado lineal realista para los sectores dorados -->
+            <!-- Degradado linear realista para sectores dorados -->
             <linearGradient id="realGold" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%"   stop-color="#f8e9a1" />  <!-- punto más claro -->
-              <stop offset="30%"  stop-color="#f1d360" />  <!-- intermedio suave -->
-              <stop offset="60%"  stop-color="#d4af37" />  <!-- tono medio auténtico -->
-              <stop offset="100%" stop-color="#8c6b1c" />  <!-- sombra profunda -->
+              <stop offset="0%"   stop-color="#f8e9a1" />
+              <stop offset="30%"  stop-color="#f1d360" />
+              <stop offset="60%"  stop-color="#d4af37" />
+              <stop offset="100%" stop-color="#8c6b1c" />
             </linearGradient>
           </defs>
-          <!-- El <g> con id="wheelGroup" se insertará dinámicamente -->
+          <!-- <g id="wheelGroup"> se generará dinámicamente desde JS -->
         </svg>
       </div>
       <button class="spin-btn" id="spinBtn">GIRAR</button>
     </div>
 
-    <!-- Box que aparecerá tras girar y completar animación -->
+    <!-- Box que aparece cuando termina la ruleta -->
     <div id="resultBox">
-      <h2>¡Felicidades!</h2>
-      <p id="resultPrize">Has obtenido: <strong></strong></p>
-      <p>Tu cupón ha sido enviado a tu correo.</p>
-      <p><small>Revisa tu carpeta de spam si no lo ves.</small></p>
+      <h2>¡Enhorabuena!</h2>
+      <p id="resultMessage">Tu premio y tu código ya han sido enviados a tu correo.</p>
     </div>
 
     <p class="disclaimer">
@@ -221,25 +208,23 @@
     ////////////////////////////////////////////////
     // 1) CONFIGURACIÓN DE PREMIOS Y PARÁMETROS
     ////////////////////////////////////////////////
-
     const prizes = [
-      // Sectores dorados con degradado realista ("gradGold"), sectores negros con "#111"
-      { text: "POSTRE GRATIS",     bgColor: "gradGold", textColor: "#111" },
-      { text: "10% DESCUENTO",     bgColor: "#111",     textColor: "#f8f8f8" },
-      { text: "CAFÉ GRATIS",       bgColor: "gradGold", textColor: "#111" },
-      { text: "5% DESCUENTO",      bgColor: "#111",     textColor: "#f8f8f8" },
-      { text: "BEBIDA GRATIS",     bgColor: "gradGold", textColor: "#111" },
-      { text: "15% DESCUENTO",     bgColor: "#111",     textColor: "#f8f8f8" }
+      { text: "POSTRE GRATIS",   bgColor: "gradGold", textColor: "#111" },
+      { text: "10% DESCUENTO",   bgColor: "#111",     textColor: "#f8f8f8" },
+      { text: "CAFÉ GRATIS",     bgColor: "gradGold", textColor: "#111" },
+      { text: "5% DESCUENTO",    bgColor: "#111",     textColor: "#f8f8f8" },
+      { text: "BEBIDA GRATIS",   bgColor: "gradGold", textColor: "#111" },
+      { text: "15% DESCUENTO",   bgColor: "#111",     textColor: "#f8f8f8" }
     ];
 
     const svgSize = 320;
-    const cx = svgSize / 2;   // 160
-    const cy = svgSize / 2;   // 160
-    const radius = 150;       // radio de la rueda
-    const borderWidth = 10;   // grosor del borde exterior
+    const cx = svgSize / 2;
+    const cy = svgSize / 2;
+    const radius = 150;
+    const borderWidth = 10;
 
-    const totalSegments = prizes.length;            // 6
-    const anglePerSegment = 360 / totalSegments;    // 60°
+    const totalSegments = prizes.length;
+    const anglePerSegment = 360 / totalSegments;
 
     // Referencias al SVG y su <g> contenedor
     const wheelSvg = document.getElementById("wheelSvg");
@@ -249,22 +234,22 @@
     wheelSvg.appendChild(wheelGroup);
 
     ////////////////////////////////////////////////
-    // 2) FUNCIÓN PARA CONVERTIR GRADOS A RADIANES
+    // 2) AUXILIAR: convierte grados a radianes
     ////////////////////////////////////////////////
     function toRad(deg) {
       return (deg * Math.PI) / 180;
     }
 
     ////////////////////////////////////////////////
-    // 3) FUNCIÓN PARA DIBUJAR LA RUEDA COMPLETA
+    // 3) DIBUJAR LA RUEDA COMPLETA
     ////////////////////////////////////////////////
     function drawWheel() {
-      // Limpiar cualquier contenido previo
+      // Limpiar contenido previo
       while (wheelGroup.firstChild) {
         wheelGroup.removeChild(wheelGroup.firstChild);
       }
 
-      // 3.1) DIBUJAR EL BORDE EXTERIOR DORADO (usando el mismo degradado realista)
+      // 3.1) Círculo exterior (borde dorado)
       const borderCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       borderCircle.setAttribute("cx", cx);
       borderCircle.setAttribute("cy", cy);
@@ -274,11 +259,10 @@
       borderCircle.setAttribute("stroke-width", borderWidth);
       wheelGroup.appendChild(borderCircle);
 
-      // 3.2) DIBUJAR CADA SECTOR Y SU TEXTO
+      // 3.2) Sectores y textos
       prizes.forEach((prize, i) => {
-        const startAngle = i * anglePerSegment;          // 0, 60, 120, ...
-        const endAngle   = startAngle + anglePerSegment; // 60, 120, 180, ...
-
+        const startAngle = i * anglePerSegment;
+        const endAngle   = startAngle + anglePerSegment;
         const startRad = toRad(startAngle);
         const endRad   = toRad(endAngle);
 
@@ -294,37 +278,33 @@
           `Z`
         ].join(" ");
 
-        // Crear <path> del sector
         const sectorPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
         sectorPath.setAttribute("d", pathData);
 
-        // Si bgColor es "gradGold", usamos el degradado realista; si no, negro plano
+        // Si bgColor="gradGold", usamos el <linearGradient id="realGold">
         if (prize.bgColor === "gradGold") {
           sectorPath.setAttribute("fill", "url(#realGold)");
         } else {
           sectorPath.setAttribute("fill", prize.bgColor);
         }
-        // El borde de cada sector se dibuja con el mismo degradado realista
         sectorPath.setAttribute("stroke", "url(#realGold)");
         sectorPath.setAttribute("stroke-width", "1");
         wheelGroup.appendChild(sectorPath);
 
-        // Calcular ángulo medio para colocar el texto
-        const midAngle = startAngle + anglePerSegment / 2; // e.g. 30, 90, 150, ...
+        // Texto del premio
+        const midAngle = startAngle + anglePerSegment / 2;
         const midRad   = toRad(midAngle);
-        const textRadius = radius - 60; // alejamos el texto del borde exterior
-
+        const textRadius = radius - 60;
         const textX = cx + textRadius * Math.cos(midRad);
         const textY = cy + textRadius * Math.sin(midRad);
 
-        // Crear <text> y ubicarlo en (textX, textY)
         const svgText = document.createElementNS("http://www.w3.org/2000/svg", "text");
         svgText.textContent = prize.text;
         svgText.setAttribute("x", textX);
         svgText.setAttribute("y", textY);
         svgText.setAttribute("fill", prize.textColor);
         svgText.setAttribute("font-family", "Montserrat, sans-serif");
-        svgText.setAttribute("font-size", "10");        // Tamaño pequeño para encajar
+        svgText.setAttribute("font-size", "10");
         svgText.setAttribute("font-weight", "600");
         svgText.setAttribute("text-anchor", "middle");
         svgText.setAttribute("alignment-baseline", "middle");
@@ -335,110 +315,82 @@
     ////////////////////////////////////////////////
     // 4) VARIABLES GLOBALES PARA EMAIL Y CUPÓN
     ////////////////////////////////////////////////
-    let userEmail  = "";  // Guardará el email ingresado
-    let couponCode = "";  // Guardará el código generado
+    let userEmail  = ""; // Email ingresado
+    let couponCode = ""; // Código generado (8 caracteres)
 
     ////////////////////////////////////////////////
-    // 5) FUNCIÓN PARA VERIFICAR EMAIL Y MOSTRAR RUEDA
+    // 5) VERIFICAR EMAIL Y MOSTRAR RUEDA (primera llamada)
     ////////////////////////////////////////////////
     async function verifyEmail() {
-      // Mostrar spinner y deshabilitar botón
-      document.getElementById("continueLabel").style.display = "none";
-      document.getElementById("spinner").style.display = "inline-block";
-      document.getElementById("continueBtn").disabled = true;
-
       const emailInput = document.getElementById('userEmail').value.trim();
-      // Validación básica de formato
       if (!emailInput.includes("@") || !emailInput.includes(".")) {
         alert("Por favor, introduce un email válido");
-        // Ocultar spinner y habilitar botón
-        document.getElementById("spinner").style.display = "none";
-        document.getElementById("continueLabel").style.display = "inline";
-        document.getElementById("continueBtn").disabled = false;
         return;
       }
 
-      // Generar un código único de 8 caracteres con uuidv4()
-      userEmail  = emailInput;
+      userEmail = emailInput;
       couponCode = uuidv4().slice(0, 8).toUpperCase();
 
       try {
-        // +++ Llamada a tu endpoint serverless (Apps Script) que revisa el email en Google Sheets +++
-        const resp = await fetch('https://script.google.com/macros/s/AKfycbzA0CLDVXChEDH9C6pBpd3LmugoFkga4Peacnvx6Y--9ziCPg44JTFKMs3xIsjB7mXiRw/exec', {
+        //  Primera llamada a Vercel: /api/check-email
+        //  (Este endpoint “vercel” se encarga de insertar [email, couponCode, timestamp_local, "no"]).
+        const resp = await fetch('/api/check-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            email:      userEmail,
+            email: userEmail,
             couponCode: couponCode
           })
         });
         const data = await resp.json();
 
-        // Ocultar spinner y habilitar botón (en ambos casos)
-        document.getElementById("spinner").style.display = "none";
-        document.getElementById("continueLabel").style.display = "inline";
-        document.getElementById("continueBtn").disabled = false;
-
-        // Si la API devolvió un error (por ej. pestaña no encontrada)
         if (data.error) {
-          console.error("Error desde el servidor:", data.error);
+          console.error("Error desde Vercel:", data.error);
           alert("Ha ocurrido un error interno. Inténtalo más tarde.");
           return;
         }
-        // Si el email ya participó antes, cancelamos el flujo y mostramos solo aviso
         if (data.already) {
           alert("Ya has participado con este email. Tu código ya fue enviado a tu correo.");
-          return; // +++ Aquí evitamos que se muestre la ruleta +++
+          return; // Detenemos aquí: no abrimos la ruleta
         }
 
-        // Si es la primera vez, ocultamos el formulario y mostramos la ruleta
+        // Si es la primera vez, ocultamos la sección de email y mostramos la ruleta
         document.getElementById('emailSection').style.display = "none";
         document.getElementById('wheelSection').style.display = "block";
         drawWheel();
+
       } catch (err) {
         console.error("Error en verifyEmail():", err);
         alert("Problema de conexión. Vuelve a intentarlo en unos segundos.");
-        // Ocultar spinner y habilitar botón
-        document.getElementById("spinner").style.display = "none";
-        document.getElementById("continueLabel").style.display = "inline";
-        document.getElementById("continueBtn").disabled = false;
       }
     }
 
     ////////////////////////////////////////////////
-    // 6) FUNCIÓN AUXILIAR: OBTENER FECHA DE EXPIRACIÓN +30 DÍAS EN ISO
-    ////////////////////////////////////////////////
-    function getExpirationDateISO() {
-      const now = new Date();
-      now.setDate(now.getDate() + 30);
-      // ISO (YYYY-MM-DD)
-      const year  = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day   = String(now.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-
-    ////////////////////////////////////////////////
-    // 7) ANIMACIÓN DE GIRO, ENVÍO DE EMAIL Y REGISTRO A GOOGLE SHEETS
+    // 6) ANIMACIÓN DE GIRO Y SEGUNDA LLAMADA (rellenar Prize/ExpirationDate)
     ////////////////////////////////////////////////
     let currentRotation = 0;
     let spinning = false;
     const spinBtn = document.getElementById("spinBtn");
+    // Reemplaza esto por la URL EXACTA de tu Apps Script (la que obtuviste al implementar)
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzA0CLDVXChEDH9C6pBpd3LmugoFkga4Peacnvx6Y--9ziCPg44JTFKMs3xIsjB7mXiRw/exec";
 
     spinBtn.addEventListener("click", () => {
       if (spinning) return;
       spinning = true;
 
+      // Elegir al azar un índice de premio
       const winnerIndex     = Math.floor(Math.random() * totalSegments);
       const centerOfWinner  = winnerIndex * anglePerSegment + anglePerSegment / 2;
 
-      // Hacemos 3 vueltas completas (3 * 360°) + 90° para que el puntero quede encima del sector correcto
-      const extraSpins    = 3 * 360;
-      const targetRotation = extraSpins + centerOfWinner + 90;
+      // Queremos que la ruleta dé 3 vueltas completas (3*360) + 
+      // el ángulo necesario para que el puntero quede en el premio.
+      const extraSpins      = 3 * 360;
+      const targetRotation  = extraSpins + centerOfWinner + 90; 
+      // (+90 porque el puntero original está rotado 90° respecto a "0°").
 
-      const duration       = 4000;
-      const startRotation  = currentRotation;
-      const startTime      = Date.now();
+      const duration  = 4000; // 4 segundos
+      const startRot  = currentRotation;
+      const startTime = Date.now();
 
       function easeOutCubic(t) {
         return 1 - Math.pow(1 - t, 3);
@@ -450,29 +402,41 @@
         const t       = Math.min(elapsed / duration, 1);
         const easedT  = easeOutCubic(t);
 
-        const newRotation = startRotation + (targetRotation - startRotation) * easedT;
+        const newRotation = startRot + (targetRotation - startRot) * easedT;
         currentRotation = newRotation;
-
         wheelGroup.setAttribute("transform", `rotate(${-currentRotation} ${cx} ${cy})`);
 
         if (t < 1) {
           requestAnimationFrame(animate);
         } else {
-          // Fin de animación
-          const premioGanado     = prizes[winnerIndex].text;
-          const expirationISO    = getExpirationDateISO();           // Ej: "2025-07-04"
-          const expirationLocale = new Date(expirationISO).toLocaleDateString('es-ES'); // Ej: "04/07/2025"
+          // Terminó la animación
+          spinning = false;
+          const premioGanado = prizes[winnerIndex].text;
 
-          // +++ LOG EN CONSOLA +++
-          console.log(
-            "🚀 Registrando en Sheets y enviando email a:", userEmail,
-            "| Código:", couponCode,
-            "| Premio:", premioGanado,
-            "| Expira:", expirationISO
-          );
+          // 6.1) Calcular fecha de expiración local (30 días adelante)
+          const expiration = new Date();
+          expiration.setDate(expiration.getDate() + 30);
+          // Formato “YYYY-MM-DD” (por el Apps Script espera exactamente este string)
+          const yyyy = expiration.getFullYear();
+          const mm   = String(expiration.getMonth() + 1).padStart(2, '0');
+          const dd   = String(expiration.getDate()).padStart(2, '0');
+          const expirationISO = `${yyyy}-${mm}-${dd}`;
 
-          // 7.1) Enviar a Google Sheets vía Apps Script (doPost)
-          fetch('https://script.google.com/macros/s/AKfycbzA0CLDVXChEDH9C6pBpd3LmugoFkga4Peacnvx6Y--9ziCPg44JTFKMs3xIsjB7mXiRw/exec', {
+          // 6.2) Enviar correo con EmailJS (mismo flujo que antes)
+          emailjs.send('service_t4py4c5', 'template_sby6x8j', {
+            to_email: userEmail,
+            premio:   premioGanado,
+            codigo:   couponCode,
+            fecha:    expiration.toLocaleDateString('es-ES')
+          })
+          .then((resp) => {
+            console.log("✅ EmailJS OK:", resp);
+          }, (err) => {
+            console.error("🚨 EmailJS Error:", err);
+          });
+
+          // 6.3) SEGUNDA LLAMADA: actualizar Prize y ExpirationDate en la hoja
+          fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -483,48 +447,35 @@
             })
           })
           .then(res => res.json())
-          .then(responseData => {
-            if (responseData.error) {
-              console.error("Error desde Apps Script:", responseData.error);
+          .then(json => {
+            if (json.error) {
+              console.error("Error actualizando en Apps Script:", json.error);
+            } else if (json.updated) {
+              console.log("✅ Hoja actualizada con Prize y ExpirationDate.");
             } else {
-              console.log("✅ Registro exitoso en Sheets:", responseData);
+              console.warn("Respuesta inesperada de Apps Script:", json);
             }
           })
           .catch(err => {
-            console.error("🚨 Error al llamar Apps Script:", err);
+            console.error("Fetch a Apps Script falló:", err);
           });
 
-          // 7.2) Enviar correo con EmailJS
-          emailjs.send('service_t4py4c5', 'template_sby6x8j', {
-            to_email: userEmail,
-            premio:   premioGanado,
-            codigo:   couponCode,
-            fecha:    expirationLocale
-          })
-          .then((resp) => {
-            console.log("✅ EmailJS dice OK:", resp);
-          }, (err) => {
-            console.error("🚨 EmailJS reporta error:", err);
-          });
-
-          // 7.3) Mostrar box de resultado con fade-out de la ruleta
+          // 6.4) Animación “fade‐out” de la ruleta y mostrar mensaje bonito
+          const wheelEl = document.getElementById("wheelSection");
+          wheelEl.style.transition = "opacity 0.8s ease";
+          wheelEl.style.opacity = "0";
           setTimeout(() => {
-            // Desvanecer la sección de la rueda
-            const wheelSec = document.getElementById('wheelSection');
-            wheelSec.style.transition = 'opacity 0.5s ease';
-            wheelSec.style.opacity = '0';
+            wheelEl.style.display = "none";
+            // Mostramos el resultBox con un fade‐in suave
+            const box = document.getElementById("resultBox");
+            box.style.opacity = "0";
+            box.style.display = "block";
+            setTimeout(() => { box.style.transition = "opacity 0.8s ease"; box.style.opacity = "1"; }, 50);
+          }, 800);
 
-            // Tras un corto delay, ocultamos la rueda y mostramos el resultado
-            setTimeout(() => {
-              wheelSec.style.display = 'none';
-
-              // Mostrar resultBox con mensaje
-              const resultBox   = document.getElementById('resultBox');
-              const prizeP      = document.getElementById('resultPrize');
-              prizeP.querySelector('strong').textContent = premioGanado;
-              resultBox.classList.add('visible');
-            }, 500);
-          }, 200); // Pequeño delay tras finalizar animación
+          // 6.5) Mensaje final en resultBox
+          document.getElementById("resultMessage").textContent =
+            `Has ganado: "${premioGanado}". Revisa tu correo con tu código. ¡Gracias por participar!`;
         }
       }
 
