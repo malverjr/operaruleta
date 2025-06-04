@@ -1,6 +1,6 @@
-import https from 'https';
+const https = require('https');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
@@ -13,7 +13,6 @@ export default async function handler(req, res) {
   const SHEETS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwmNU0gJUYa0Tu1KsWJkJHEKovfymB9aMajCU0Xb1-80JzDn6GAUVLEo3puUc1m_09P_w/exec';
 
   const payload = JSON.stringify({ email, couponCode });
-
   const url = new URL(SHEETS_WEBAPP_URL);
 
   const options = {
@@ -42,11 +41,11 @@ export default async function handler(req, res) {
     });
   });
 
-  request.on('error', (err) => {
+  request.on('error', err => {
     console.error('❌ Error HTTPS:', err);
     return res.status(500).json({ error: 'Error de conexión con Google Sheets' });
   });
 
   request.write(payload);
   request.end();
-}
+};
