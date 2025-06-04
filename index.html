@@ -175,12 +175,15 @@
     <div id="emailSection">
       <p>Introduce tu email para participar:</p>
       <input type="email" id="userEmail" class="email-input" placeholder="tucorreo@ejemplo.com">
-      <button class="spin-btn" onclick="verifyEmail()">CONTINUAR</button>
+      <button class="spin-btn" onclick="verifyEmail()" id="continueBtn">
+        <span id="continueLabel">CONTINUAR</span>
+        <span id="spinner" style="display:none;">⏳</span>
+      </button>
     </div>
 
     <!-- Sección de la rueda (oculta hasta que el email sea válido) -->
     <div id="wheelSection">
-      <div class="wheel-container">
+      <div class="wheel-container" id="wheelContainer">
         <div class="pointer"></div>
         <!-- SVG para la ruleta con degradado realista -->
         <svg id="wheelSvg" viewBox="0 0 320 320">
@@ -339,10 +342,19 @@
     // 5) FUNCIÓN PARA VERIFICAR EMAIL Y MOSTRAR RUEDA
     ////////////////////////////////////////////////
     async function verifyEmail() {
+      // Mostrar spinner y deshabilitar botón
+      document.getElementById("continueLabel").style.display = "none";
+      document.getElementById("spinner").style.display = "inline-block";
+      document.getElementById("continueBtn").disabled = true;
+
       const emailInput = document.getElementById('userEmail').value.trim();
       // Validación básica de formato
       if (!emailInput.includes("@") || !emailInput.includes(".")) {
         alert("Por favor, introduce un email válido");
+        // Ocultar spinner y habilitar botón
+        document.getElementById("spinner").style.display = "none";
+        document.getElementById("continueLabel").style.display = "inline";
+        document.getElementById("continueBtn").disabled = false;
         return;
       }
 
@@ -351,8 +363,8 @@
       couponCode = uuidv4().slice(0, 8).toUpperCase();
 
       try {
-        // +++ Llamada a tu endpoint serverless que revisa el email en Google Sheets +++
-        const resp = await fetch('https://operaruleta.vercel.app/api/check-email', {
+        // +++ Llamada a tu endpoint serverless (Apps Script) que revisa el email en Google Sheets +++
+        const resp = await fetch('https://script.google.com/macros/s/AKfycbzA0CLDVXChEDH9C6pBpd3LmugoFkga4Peacnvx6Y--9ziCPg44JTFKMs3xIsjB7mXiRw/exec', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -362,7 +374,12 @@
         });
         const data = await resp.json();
 
-        // Si la API devolvió un error (por ejemplo, pestaña no encontrada)
+        // Ocultar spinner y habilitar botón (en ambos casos)
+        document.getElementById("spinner").style.display = "none";
+        document.getElementById("continueLabel").style.display = "inline";
+        document.getElementById("continueBtn").disabled = false;
+
+        // Si la API devolvió un error (por ej. pestaña no encontrada)
         if (data.error) {
           console.error("Error desde el servidor:", data.error);
           alert("Ha ocurrido un error interno. Inténtalo más tarde.");
@@ -381,6 +398,10 @@
       } catch (err) {
         console.error("Error en verifyEmail():", err);
         alert("Problema de conexión. Vuelve a intentarlo en unos segundos.");
+        // Ocultar spinner y habilitar botón
+        document.getElementById("spinner").style.display = "none";
+        document.getElementById("continueLabel").style.display = "inline";
+        document.getElementById("continueBtn").disabled = false;
       }
     }
 
