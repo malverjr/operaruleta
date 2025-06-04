@@ -15,7 +15,11 @@
       --oro-4: #8c6b1c; /* sombra profunda */
       --negro: #111;
       --blanco: #f8f8f8;
+      --gris-toast: rgba(0,0,0,0.8);
+      --texto-toast: #f8f8f8;
+      --boton-toast: #caa86f;
     }
+
     body {
       margin: 0;
       padding: 20px;
@@ -117,11 +121,55 @@
         var(--oro-2) 100%
       );
     }
+
     .disclaimer {
       font-size: 12px;
       color: #aaa;
       margin-top: 20px;
       line-height: 1.4;
+    }
+
+    /* ————————————————
+       CUADRO NEGRO DE NOTIFICACIÓN (el “toast” EXACTO que pediste)
+       ———————————————— */
+    #blackToast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: var(--gris-toast);
+      padding: 20px 30px;
+      border-radius: 8px;
+      color: var(--texto-toast);
+      max-width: 90%;
+      width: 320px;
+      font-family: 'Montserrat', sans-serif;
+      display: none; /* oculto por defecto */
+      z-index: 9999;
+      text-align: center;
+    }
+    #blackToast h2 {
+      margin: 0 0 12px 0;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #blackToast p {
+      margin: 6px 0;
+      font-size: 14px;
+    }
+    #blackToast button {
+      margin-top: 12px;
+      background: none;
+      border: 1px solid var(--boton-toast);
+      color: var(--boton-toast);
+      padding: 6px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    #blackToast button:hover {
+      background-color: var(--boton-toast);
+      color: var(--negro);
     }
   </style>
 
@@ -176,6 +224,17 @@
       ** Todos los premios son canjeables únicamente en una próxima visita con consumo de comida o cena (no canjeables de forma independiente).
     </p>
   </div>
+
+  <!-- ————————————————
+       CUADRO NEGRO DE NOTIFICACIÓN (EL “TOAST” EXACTO)
+       ———————————————— -->
+  <div id="blackToast">
+    <h2 id="toastTitle">¡Felicitaciones!</h2>
+    <p id="toastMessage1">Has ganado: “<span id="toastPrize"></span>”.</p>
+    <p id="toastMessage2">Revisa tu correo con tu código: <strong id="toastCode"></strong>.</p>
+    <button onclick="closeToast()">Aceptar</button>
+  </div>
+
 
   <script>
     ////////////////////////////////////////////////
@@ -308,11 +367,12 @@
       couponCode = uuidv4().slice(0, 8).toUpperCase();
 
       try {
+        // Llamada a tu endpoint serverless (/api/check-email)
         const resp = await fetch('/api/check-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            email: userEmail,
+            email:      userEmail,
             couponCode: couponCode
           })
         });
@@ -321,20 +381,18 @@
         if (data.error) {
           console.error("Error desde Vercel:", data.error);
           alert("Ha ocurrido un error interno. Inténtalo más tarde.");
-          // Restaurar botón
           btn.disabled = false;
           btn.innerHTML = "CONTINUAR";
           return;
         }
         if (data.already) {
           alert("Ya has participado con este email. Tu código ya fue enviado a tu correo.");
-          // Restaurar botón
           btn.disabled = false;
           btn.innerHTML = "CONTINUAR";
           return;
         }
 
-        // Si es la primera vez, ocultar formulario y mostrar ruleta
+        // Si es válido por primera vez, ocultar formulario y mostrar ruleta
         document.getElementById('emailSection').style.display = "none";
         document.getElementById('wheelSection').style.display = "block";
         drawWheel();
@@ -342,7 +400,6 @@
       } catch (err) {
         console.error("Error en verifyEmail():", err);
         alert("Problema de conexión. Vuelve a intentarlo en unos segundos.");
-        // Restaurar botón
         btn.disabled = false;
         btn.innerHTML = "CONTINUAR";
       }
@@ -355,8 +412,11 @@
     let spinning = false;
     const spinBtn = document.getElementById("spinBtn");
 
-    // ** Asegúrate de pegar TU URL EXACTA de Apps Script aquí: **
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzA0CLDVXChEDH9C6pBpd3LmugoFkga4Peacnvx6Y--9ziCPg44JTFKMs3xIsjB7mXiRw/exec";
+    // ————————————————
+    // Pega aquí EXACTAMENTE la URL que obtuviste de “Implementar → Gestionar implementaciones”
+    // Así:
+    // const APPS_SCRIPT_URL = "https://script.google.com/macros/s/XXXXXXXXXXXXX/exec";
+    const APPS_SCRIPT_URL = "TU_APPS_SCRIPT_URL_AQUÍ";
 
     spinBtn.addEventListener("click", () => {
       if (spinning) return;
@@ -388,23 +448,23 @@
         if (t < 1) {
           requestAnimationFrame(animate);
         } else {
-          // Llega aquí cuando la ruleta termina de girar
+          // Aquí termina la animación
           const premioGanado = prizes[winnerIndex].text;
 
-          // 6.1) Calcular fecha de expiración local
+          // 6.1) Calcular fecha de expiración local en formato “YYYY-MM-DD”
           const expiration = new Date();
           expiration.setDate(expiration.getDate() + 30);
           const yyyy = expiration.getFullYear();
           const mm   = String(expiration.getMonth() + 1).padStart(2, '0');
           const dd   = String(expiration.getDate()).padStart(2, '0');
-          const expirationISO = `${yyyy}-${mm}-${dd}`; // “YYYY-MM-DD”
+          const expirationISO = `${yyyy}-${mm}-${dd}`; // “2025-07-04”
 
           // 6.2) Enviar correo con EmailJS
           emailjs.send('service_t4py4c5', 'template_sby6x8j', {
             to_email: userEmail,
             premio:   premioGanado,
             codigo:   couponCode,
-            fecha:    expiration.toLocaleDateString('es-ES')
+            fecha:    expiration.toLocaleDateString('es-ES') // “dd/mm/yyyy”
           })
           .then((resp) => {
             console.log("✅ EmailJS OK:", resp);
@@ -412,7 +472,7 @@
             console.error("🚨 EmailJS Error:", err);
           });
 
-          // 6.3) Segunda llamada a Apps Script: grabar Prize y ExpirationDate
+          // 6.3) Segunda llamada a Apps Script para insertar Prize y ExpirationDate
           fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -437,10 +497,10 @@
             console.error("Fetch a Apps Script falló:", err);
           });
 
-          // 6.4) Mensaje final con alert (al estilo clásico)
-          setTimeout(() => {
-            alert(`¡Felicidades! Has ganado: “${premioGanado}”.\n\nRevisa tu correo con tu código (códi. ${couponCode}).`);
-          }, 200);
+          // 6.4) Mostrar el cuadro negro (“blackToast”) con el mensaje
+          document.getElementById("toastPrize").innerText = premioGanado;
+          document.getElementById("toastCode").innerText  = couponCode;
+          document.getElementById("blackToast").style.display = "block";
 
           spinning = false;
         }
@@ -448,6 +508,12 @@
 
       requestAnimationFrame(animate);
     });
+
+    // Función para cerrar el toast negro
+    function closeToast() {
+      document.getElementById("blackToast").style.display = "none";
+    }
   </script>
 </body>
 </html>
+
