@@ -1,51 +1,38 @@
-const https = require('https');
+// /api/check-email.js
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
+  // 1. Validamos método POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
+  // 2. Extraemos email y cupón del body
   const { email, couponCode } = req.body;
   if (!email || !couponCode) {
     return res.status(400).json({ error: 'Faltan campos' });
   }
 
-  const SHEETS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwmNU0gJUYa0Tu1KsWJkJHEKovfymB9aMajCU0Xb1-80JzDn6GAUVLEo3puUc1m_09P_w/exec';
+  // 3. URL pública del script de Google
+  const SHEETS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwmNU0gJUYa0Tu1KsWkJHEKovfymB9aMajCU0Xb1-80JzDn6GAUVLEo3puUc1m_09P_w/exec';
 
-  const payload = JSON.stringify({ email, couponCode });
-  const url = new URL(SHEETS_WEBAPP_URL);
-
-  const options = {
-    hostname: url.hostname,
-    path: url.pathname + url.search,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(payload)
-    }
-  };
-
-  const request = https.request(options, response => {
-    let data = '';
-    response.on('data', chunk => { data += chunk; });
-    response.on('end', () => {
-      try {
-        const parsed = JSON.parse(data);
-        if (parsed.error) {
-          return res.status(500).json({ error: parsed.error });
-        }
-        return res.status(200).json({ already: parsed.already || false });
-      } catch (err) {
-        return res.status(500).json({ error: 'Respuesta inválida del servidor de Sheets.' });
-      }
+  try {
+    // 4. Enviamos a Apps Script
+    const response = await fetch(SHEETS_WEBAPP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, couponCode })
     });
-  });
 
-  request.on('error', err => {
-    console.error('❌ Error HTTPS:', err);
-    return res.status(500).json({ error: 'Error de conexión con Google Sheets' });
-  });
+    const data = await response.json();
 
-  request.write(payload);
-  request.end();
-};
+    if (data.error) {
+      console.error("❌ Error desde Google Script:", data.error);
+      return res.status(500).json({ error: data.error });
+    }
+
+    return res.status(200).json({ already: data.already || false });
+  } catch (err) {
+    console.error("❌ Error conectando con Apps Script:", err);
+    return res.status(500).json({ error: 'Fallo al conectar con Google Sheets.' });
+  }
+}
