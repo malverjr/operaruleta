@@ -201,7 +201,7 @@
       couponCode = uuidv4().slice(0, 8).toUpperCase();
 
       try {
-        const resp = await fetch('https://script.google.com/macros/s/AKfycbxhriTndeqlKMxfp4A7R4c2_GCx9Re3h2Tpxp-uaWCTJ4HfGRfiaZxdXZbt7SFt8EXWuw/exec', {
+        const resp = await fetch('/api/check-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: userEmail, couponCode })
