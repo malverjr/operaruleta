@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   }
 
   // 3) URL de tu Apps Script publicada como Web App
-  const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzA0CLDVXChEDH9C6pBpd3LmugoFkga4Peacnvx6Y--9ziCPg44JTFKMs3xIsjB7mXiRw/exec";
+const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxhriTndeqlKMxfp4A7R4c2_GCx9Re3h2Tpxp-uaWCTJ4HfGRfiaZxdXZbt7SFt8EXWuw/exec";
 
   try {
     // 4) Reenviamos la petición (email, couponCode) a Google Sheets
