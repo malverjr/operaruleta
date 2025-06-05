@@ -7,13 +7,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-  --oro-1: #fff8d3; /* punto más claro, casi blanco cálido */
-  --oro-2: #f5dc85; /* tono crema dorado intermedio */
-  --oro-3: #e0b64b; /* dorado principal realista */
-  --oro-4: #a0781c; /* sombra profunda más elegante */
-  --negro: #111;
-  --blanco: #f8f8f8;
-}
+      --oro-1: #fff8d3; /* punto más claro, casi blanco cálido */
+      --oro-2: #f5dc85; /* tono crema dorado intermedio */
+      --oro-3: #e0b64b; /* dorado principal realista */
+      --oro-4: #a0781c; /* sombra profunda más elegante */
+      --negro: #111;
+      --blanco: #f8f8f8;
+    }
     body {
       margin: 0;
       padding: 20px;
@@ -57,6 +57,8 @@
     }
     #wheelSection {
       display: none;
+      opacity: 1;
+      transition: opacity 0.5s ease;
     }
     .wheel-container {
       position: relative;
@@ -95,6 +97,9 @@
     .spin-btn:hover {
       background: linear-gradient(180deg, var(--oro-2), var(--oro-3), var(--oro-2));
     }
+    .fade-out {
+      opacity: 0 !important;
+    }
     .disclaimer {
       font-size: 12px;
       color: #aaa;
@@ -113,35 +118,35 @@
       from { opacity: 0; }
       to { opacity: 1; }
     }
-#congratsBox {
-  background-color: var(--oro-3);
-  padding: 25px;
-  margin-top: 30px;
-  border-radius: 12px;
-  animation: fadeIn 0.8s ease-in-out;
-  max-width: 460px;
-  margin-left: auto;
-  margin-right: auto;
-  color: var(--oro-3);  /* ✅ todo blanco por defecto */
-}
+    #congratsBox {
+      background-color: var(--oro-3);
+      padding: 25px;
+      margin-top: 30px;
+      border-radius: 12px;
+      animation: fadeIn 0.8s ease-in-out;
+      max-width: 460px;
+      margin-left: auto;
+      margin-right: auto;
+      color: var(--oro-3);  /* ✅ todo blanco por defecto */
+    }
 
-#congratsBox h2 {
-  font-size: 22px;
-  color: var(--oro-3);  /* ✅ blanco también */
-  margin-bottom: 12px;
-}
+    #congratsBox h2 {
+      font-size: 22px;
+      color: var(--oro-3);  /* ✅ blanco también */
+      margin-bottom: 12px;
+    }
 
-#congratsBox .premio {
-  font-size: 20px;
-  color: var(--oro-3);  /* ✅ solo el premio en dorado */
-  font-weight: bold;
-}
+    #congratsBox .premio {
+      font-size: 20px;
+      color: var(--oro-3);  /* ✅ solo el premio en dorado */
+      font-weight: bold;
+    }
 
-#congratsBox .email {
-  font-style: italic;
-  font-size: 16px;
-  color: var(--oro-3);  /* ✅ blanco */
-}
+    #congratsBox .email {
+      font-style: italic;
+      font-size: 16px;
+      color: var(--oro-3);  /* ✅ blanco */
+    }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuidv4.min.js"></script>
@@ -169,12 +174,11 @@
         <svg id="wheelSvg" viewBox="0 0 320 320">
           <defs>
             <linearGradient id="realGold" x1="0%" y1="0%" x2="0%" y2="100%">
-  <stop offset="0%"   stop-color="#fff8d3" />   <!-- punto más claro -->
-  <stop offset="30%"  stop-color="#f5dc85" />   <!-- crema intermedio -->
-  <stop offset="60%"  stop-color="#e0b64b" />   <!-- dorado principal -->
-  <stop offset="100%" stop-color="#a0781c" />   <!-- sombra profunda -->
-</linearGradient>
-
+              <stop offset="0%"   stop-color="#fff8d3" />   <!-- punto más claro -->
+              <stop offset="30%"  stop-color="#f5dc85" />   <!-- crema intermedio -->
+              <stop offset="60%"  stop-color="#e0b64b" />   <!-- dorado principal -->
+              <stop offset="100%" stop-color="#a0781c" />   <!-- sombra profunda -->
+            </linearGradient>
           </defs>
         </svg>
       </div>
@@ -315,10 +319,18 @@
             fecha: fechaStr
           });
 
-          // Fade out y mostrar mensaje
-          document.getElementById("wheelSection").style.display = "none";
-          document.getElementById("messageBox").style.display = "block";
-          document.getElementById("messageBox").innerHTML = `¡Felicidades!<br>Has ganado <strong>${prize}</strong>.<br>Tu código ha sido enviado a <em>${userEmail}</em>`;
+          // AÑADIDO: fade-out suave de la ruleta y el botón
+          const wheelSection = document.getElementById("wheelSection");
+          wheelSection.classList.add("fade-out");
+          spinBtn.classList.add("fade-out");
+
+          setTimeout(() => {
+            wheelSection.style.display = "none";
+            spinBtn.style.display = "none";
+            document.getElementById("messageBox").style.display = "block";
+            document.getElementById("messageBox").innerHTML =
+              `¡Felicidades!<br>Has ganado <strong>${prize}</strong>.<br>Tu código ha sido enviado a <em>${userEmail}</em>`;
+          }, 500);
         }
       }
 
@@ -327,5 +339,4 @@
   </script>
 </body>
 </html>
-
 
