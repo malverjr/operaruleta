@@ -107,8 +107,38 @@
       line-height: 1.4;
     }
 
-    /* NUEVO: Bloque de mensaje tras girar */
+    /* NUEVO: Bordé con luz blanca en movimiento */
+    .message-border {
+      position: relative;
+      display: inline-block;
+      padding: 20px;
+      border: 2px solid transparent;
+      border-radius: 4px;
+      background: 
+        linear-gradient(var(--negro), var(--negro)) padding-box,
+        linear-gradient(
+          90deg,
+          rgba(255,255,255,0) 0%,
+          rgba(255,255,255,0.8) 50%,
+          rgba(255,255,255,0) 100%
+        ) border-box;
+      background-size: 200% 100%;
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+      animation: borderLight 2s linear infinite;
+      text-align: center;
+    }
 
+    @keyframes borderLight {
+      0% {
+        background-position: 0 0;
+      }
+      100% {
+        background-position: 100% 0;
+      }
+    }
+
+    /* NUEVO: Bloque de mensaje tras girar */
     @keyframes fadeOut {
       from { opacity: 1; }
       to { opacity: 0; display: none; }
@@ -319,7 +349,7 @@
             fecha: fechaStr
           });
 
-          // AÑADIDO: fade-out suave de la ruleta y el botón
+          // fade-out suave de la ruleta y el botón
           const wheelSection = document.getElementById("wheelSection");
           wheelSection.classList.add("fade-out");
           spinBtn.classList.add("fade-out");
@@ -327,9 +357,15 @@
           setTimeout(() => {
             wheelSection.style.display = "none";
             spinBtn.style.display = "none";
+            // inserta el mensaje final con el borde animado
             document.getElementById("messageBox").style.display = "block";
-            document.getElementById("messageBox").innerHTML =
-              `¡Felicidades!<br>Has ganado <strong>${prize}</strong>.<br>Tu código ha sido enviado a <em>${userEmail}</em>`;
+            document.getElementById("messageBox").innerHTML = `
+              <div class="message-border">
+                ¡Felicidades!<br>
+                Has ganado <strong>${prize}</strong>.<br>
+                Tu código ha sido enviado a <em>${userEmail}</em>
+              </div>
+            `;
           }, 500);
         }
       }
@@ -339,4 +375,5 @@
   </script>
 </body>
 </html>
+
 
