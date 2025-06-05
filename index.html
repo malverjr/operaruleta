@@ -7,14 +7,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --oro-1: #fff8d3; /* punto más claro, casi blanco cálido */
-      --oro-2: #f5dc85; /* tono crema dorado intermedio */
-      --oro-3: #e0b64b; /* dorado principal realista */
-      --oro-4: #a0781c; /* sombra profunda más elegante */
-      --negro: #111;
-      --blanco: #f8f8f8;
-    }
-
+  --oro-1: #fff8d3; /* punto más claro, casi blanco cálido */
+  --oro-2: #f5dc85; /* tono crema dorado intermedio */
+  --oro-3: #e0b64b; /* dorado principal realista */
+  --oro-4: #a0781c; /* sombra profunda más elegante */
+  --negro: #111;
+  --blanco: #f8f8f8;
+}
     body {
       margin: 0;
       padding: 20px;
@@ -27,18 +26,15 @@
       flex-direction: column;
       align-items: center;
     }
-
     .container {
       max-width: 500px;
       width: 100%;
       position: relative;
     }
-
     .logo {
       width: 180px;
       margin: 20px 0;
     }
-
     h1 {
       font-family: 'Playfair Display', serif;
       margin-bottom: 30px;
@@ -46,11 +42,9 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-
     #emailSection {
       display: block;
     }
-
     .email-input {
       width: 80%;
       padding: 12px;
@@ -58,28 +52,22 @@
       border: 2px solid var(--oro-3);
       border-radius: 4px;
       background: rgba(0,0,0,0.2);
-      color: var(--blanco);
+      color: white;
       font-size: 16px;
     }
-
     #wheelSection {
       display: none;
-      opacity: 1; /* para animar opacidad */
-      transition: opacity 0.5s ease; /* transición suave */
     }
-
     .wheel-container {
       position: relative;
       width: 320px;
       height: 320px;
       margin: 30px auto;
     }
-
     #wheelSvg {
       width: 100%;
       height: 100%;
     }
-
     .pointer {
       position: absolute;
       top: -10px;
@@ -91,7 +79,6 @@
       clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
       z-index: 2;
     }
-
     .spin-btn {
       background: linear-gradient(180deg, var(--oro-1), var(--oro-2), var(--oro-3), var(--oro-4));
       color: var(--negro);
@@ -103,13 +90,11 @@
       cursor: pointer;
       font-family: 'Playfair Display', serif;
       margin-top: 20px;
-      transition: opacity 0.5s ease; /* transición suave */
+      transition: opacity 0.5s ease;
     }
-
     .spin-btn:hover {
       background: linear-gradient(180deg, var(--oro-2), var(--oro-3), var(--oro-2));
     }
-
     .disclaimer {
       font-size: 12px;
       color: #aaa;
@@ -117,69 +102,46 @@
       line-height: 1.4;
     }
 
-    /* ——————————————————————————————————————
-       ANIMACIONES DE FADE-OUT
-       —————————————————————————————————————— */
+    /* NUEVO: Bloque de mensaje tras girar */
 
-    .fade-out {
-      opacity: 0 !important;
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; display: none; }
     }
 
-    /* ——————————————————————————————————————
-       ESTILOS PARA EL “FELICIDADES / HAS GANADO”
-       —————————————————————————————————————— */
-
-    /* Contenedor general (se mostrará dentro de #messageBox) */
-    #congratsBox {
-      display: inline-block; /* para centrar y ajustar al contenido */
-      padding: 20px 25px;
-      border: 2px solid transparent; /* el color vendrá por border-image */
-      border-radius: 8px;
-      border-image: linear-gradient(180deg, var(--oro-1), var(--oro-2), var(--oro-3), var(--oro-4)) 1;
-      background-color: rgba(0, 0, 0, 0.6); /* semitransparente para que contraste con texto */
-      margin-top: 30px;
-      text-align: left;
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
+#congratsBox {
+  background-color: var(--oro-3);
+  padding: 25px;
+  margin-top: 30px;
+  border-radius: 12px;
+  animation: fadeIn 0.8s ease-in-out;
+  max-width: 460px;
+  margin-left: auto;
+  margin-right: auto;
+  color: var(--oro-3);  /* ✅ todo blanco por defecto */
+}
 
-    #congratsBox h2 {
-      font-size: 22px;
-      color: var(--blanco);
-      margin: 0 0 12px 0;
-      font-family: 'Playfair Display', serif;
-    }
+#congratsBox h2 {
+  font-size: 22px;
+  color: var(--oro-3);  /* ✅ blanco también */
+  margin-bottom: 12px;
+}
 
-    /* El párrafo que contendrá “Has ganado” */
-    #congratsBox p {
-      margin: 0 0 10px 0;
-      color: var(--blanco);
-      font-size: 16px;
-      line-height: 1.4;
-    }
+#congratsBox .premio {
+  font-size: 20px;
+  color: var(--oro-3);  /* ✅ solo el premio en dorado */
+  font-weight: bold;
+}
 
-    /* El texto del premio en degradado dorado */
-    #congratsBox .premio {
-      font-size: 20px;
-      font-weight: bold;
-      background: linear-gradient(180deg, var(--oro-1), var(--oro-2), var(--oro-3), var(--oro-4));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    /* El email en cursiva (lo mantenemos en un blanco tenue) */
-    #congratsBox .email {
-      font-style: italic;
-      font-size: 16px;
-      color: var(--blanco);
-    }
-
-    /* Para ocultar inicialmente el contenedor de mensaje */
-    #messageBox {
-      display: none;
-    }
-
-    /* ——————————————————————————————————————
-       FIN ESTILOS
-       —————————————————————————————————————— */
+#congratsBox .email {
+  font-style: italic;
+  font-size: 16px;
+  color: var(--oro-3);  /* ✅ blanco */
+}
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuidv4.min.js"></script>
@@ -194,7 +156,6 @@
          alt="Opera Maritim" class="logo" />
     <h1>¡Gira y descubre tu premio!</h1>
 
-    <!-- Sección de email -->
     <div id="emailSection">
       <p>Introduce tu email para participar:</p>
       <input type="email" id="userEmail" class="email-input" placeholder="tucorreo@ejemplo.com">
@@ -202,26 +163,24 @@
       <div id="loadingIcon" style="font-size: 24px; margin-top: 10px; display: none;">⏳</div>
     </div>
 
-    <!-- Sección de la ruleta -->
     <div id="wheelSection">
       <div class="wheel-container">
         <div class="pointer"></div>
         <svg id="wheelSvg" viewBox="0 0 320 320">
           <defs>
             <linearGradient id="realGold" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%"   stop-color="#fff8d3" />   <!-- punto más claro -->
-              <stop offset="30%"  stop-color="#f5dc85" />   <!-- crema intermedio -->
-              <stop offset="60%"  stop-color="#e0b64b" />   <!-- dorado principal -->
-              <stop offset="100%" stop-color="#a0781c" />   <!-- sombra profunda -->
-            </linearGradient>
+  <stop offset="0%"   stop-color="#fff8d3" />   <!-- punto más claro -->
+  <stop offset="30%"  stop-color="#f5dc85" />   <!-- crema intermedio -->
+  <stop offset="60%"  stop-color="#e0b64b" />   <!-- dorado principal -->
+  <stop offset="100%" stop-color="#a0781c" />   <!-- sombra profunda -->
+</linearGradient>
+
           </defs>
-          <!-- Aquí se van a dibujar los segmentos dinámicamente -->
         </svg>
       </div>
       <button class="spin-btn" id="spinBtn">GIRAR</button>
     </div>
 
-    <!-- Aquí se inyectará el mensaje de “Felicidades” -->
     <div id="messageBox"></div>
 
     <p class="disclaimer">
@@ -252,20 +211,15 @@
     function toRad(deg) { return (deg * Math.PI) / 180; }
 
     function drawWheel() {
-      // Limpiar segmentos anteriores
       while (wheelGroup.firstChild) wheelGroup.removeChild(wheelGroup.firstChild);
-
-      // Borde externo con degradado dorado
       const border = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      border.setAttribute("cx", cx);
-      border.setAttribute("cy", cy);
+      border.setAttribute("cx", cx); border.setAttribute("cy", cy);
       border.setAttribute("r", radius + borderWidth / 2);
       border.setAttribute("fill", "none");
       border.setAttribute("stroke", "url(#realGold)");
       border.setAttribute("stroke-width", borderWidth);
       wheelGroup.appendChild(border);
 
-      // Dibujar cada segmento
       prizes.forEach((prize, i) => {
         const startAngle = i * anglePerSegment;
         const endAngle = startAngle + anglePerSegment;
@@ -275,7 +229,6 @@
           `A ${radius},${radius} 0 0,1 ${cx + radius * Math.cos(toRad(endAngle))},${cy + radius * Math.sin(toRad(endAngle))}`,
           "Z"
         ].join(" ");
-
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("d", pathData);
         path.setAttribute("fill", prize.bgColor === "gradGold" ? "url(#realGold)" : prize.bgColor);
@@ -302,9 +255,7 @@
 
     async function verifyEmail() {
       const email = document.getElementById('userEmail').value.trim();
-      if (!email.includes("@") || !email.includes(".")) {
-        return alert("Email no válido");
-      }
+      if (!email.includes("@") || !email.includes(".")) return alert("Email no válido");
 
       userEmail = email;
       couponCode = uuidv4().slice(0, 8).toUpperCase();
@@ -321,14 +272,9 @@
         const data = await resp.json();
         document.getElementById("loadingIcon").style.display = "none";
 
-        if (data.error) {
-          return alert("Error interno. Inténtalo más tarde.");
-        }
-        if (data.already) {
-          return alert("Ya has participado. Revisa tu correo.");
-        }
+        if (data.error) return alert("Error interno. Inténtalo más tarde.");
+        if (data.already) return alert("Ya has participado. Revisa tu correo.");
 
-        // Ocultar sección de email y mostrar ruleta
         document.getElementById("emailSection").style.display = "none";
         document.getElementById("wheelSection").style.display = "block";
         drawWheel();
@@ -345,7 +291,6 @@
       spinning = true;
 
       const winnerIndex = Math.floor(Math.random() * totalSegments);
-      // Queremos 1080° (3 vueltas completas) + posición exacta del premio
       const targetRotation = 1080 + (winnerIndex * anglePerSegment + anglePerSegment / 2 + 90);
       const duration = 4000, start = Date.now(), startRot = currentRotation;
 
@@ -358,13 +303,11 @@
         currentRotation = startRot + (targetRotation - startRot) * eased;
         wheelGroup.setAttribute("transform", `rotate(${-currentRotation} ${cx} ${cy})`);
 
-        if (t < 1) {
-          requestAnimationFrame(animate);
-        } else {
+        if (t < 1) requestAnimationFrame(animate);
+        else {
           const prize = prizes[winnerIndex].text;
           const fechaStr = new Date(Date.now() + 30 * 86400000).toLocaleDateString('es-ES');
 
-          // Enviamos el email con EmailJS
           emailjs.send('service_t4py4c5', 'template_sby6x8j', {
             to_email: userEmail,
             premio: prize,
@@ -372,38 +315,17 @@
             fecha: fechaStr
           });
 
-          // ————————————————————————————————————————————
-          // 1) Aplicar fade-out suave a #wheelSection
-          const wheelSection = document.getElementById("wheelSection");
-          wheelSection.classList.add("fade-out");
-          // También hacemos fade el botón (por si hubiera margen fuera del contenedor)
-          spinBtn.classList.add("fade-out");
-
-          // 2) Después de 500 ms (tiempo de la transición), escondemos y mostramos el mensaje
-          setTimeout(() => {
-            wheelSection.style.display = "none";
-            spinBtn.style.display = "none";
-            showCongrats(prize, userEmail);
-          }, 500);
+          // Fade out y mostrar mensaje
+          document.getElementById("wheelSection").style.display = "none";
+          document.getElementById("messageBox").style.display = "block";
+          document.getElementById("messageBox").innerHTML = `¡Felicidades!<br>Has ganado <strong>${prize}</strong>.<br>Tu código ha sido enviado a <em>${userEmail}</em>`;
         }
       }
 
       requestAnimationFrame(animate);
     });
-
-    function showCongrats(prize, email) {
-      const msgBox = document.getElementById("messageBox");
-      msgBox.style.display = "block";
-      // Inyectamos el HTML del contenedor #congratsBox
-      msgBox.innerHTML = `
-        <div id="congratsBox">
-          <h2>¡Felicidades!</h2>
-          <p>Has ganado <span class="premio">${prize}</span>.</p>
-          <p>Tu código ha sido enviado a <span class="email">${email}</span>.</p>
-        </div>
-      `;
-    }
   </script>
 </body>
 </html>
+
 
