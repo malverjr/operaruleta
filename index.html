@@ -107,31 +107,31 @@
       line-height: 1.4;
     }
 
-    /* NUEVO: Bordé con luz blanca en movimiento */
+    /* Bordé con luz dorada en movimiento */
     .message-border {
       position: relative;
       display: inline-block;
       padding: 20px;
       border: 2px solid transparent;
-      border-radius: 4px;
+      border-radius: 12px;
       background: 
         linear-gradient(var(--negro), var(--negro)) padding-box,
         linear-gradient(
           90deg,
-          rgba(255,255,255,0) 0%,
-          rgba(255,255,255,0.8) 50%,
-          rgba(255,255,255,0) 100%
+          rgba(224,182,75,0) 0%,
+          rgba(224,182,75,0.8) 50%,
+          rgba(224,182,75,0) 100%
         ) border-box;
       background-size: 200% 100%;
       background-origin: border-box;
       background-clip: padding-box, border-box;
-      animation: borderLight 2s linear infinite;
+      animation: borderLight 3s linear infinite;
       text-align: center;
     }
 
     @keyframes borderLight {
       0% {
-        background-position: 0 0;
+        background-position: -100% 0;
       }
       100% {
         background-position: 100% 0;
@@ -375,5 +375,4 @@
   </script>
 </body>
 </html>
-
 
