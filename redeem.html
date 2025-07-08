@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Validar Cupón</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; text-align: center; }
+    input { padding: 10px; width: 200px; }
+    button { padding: 10px 20px; margin-left: 10px; }
+    p { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Validar código QR</h1>
+  <input type="text" id="code" placeholder="Introduce el código" />
+  <button id="btn">Validar</button>
+  <p id="result"></p>
+
+  <script>
+    document.getElementById('btn').onclick = async () => {
+      const code = document.getElementById('code').value.trim();
+      const p = document.getElementById('result');
+      if (!code) {
+        p.textContent = 'Por favor introduce un código.';
+        return;
+      }
+      p.textContent = 'Validando…';
+      try {
+        const resp = await fetch('/api/redeem-code', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ couponCode: code })
+        });
+        const data = await resp.json();
+        if (data.error) {
+          p.textContent = 'Error: ' + data.error;
+        } else if (!data.valid) {
+          p.textContent = 'Código inválido.';
+        } else if (data.alreadyRedeemed) {
+          p.textContent = 'Este código ya fue canjeado.';
+        } else {
+          p.textContent = '¡Cupón validado correctamente!';
+        }
+      } catch {
+        p.textContent = 'Error de conexión.';
+      }
+    }
+  </script>
+</body>
+</html>
