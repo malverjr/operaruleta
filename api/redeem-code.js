@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Falta couponCode' });
   }
 
-  const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/…TU_WEBAPP_ID…/exec";
+  const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwmrNUOgJUYa0Tu1KsuKJHEKovfymB9aMajCUOXb1-80JzDnGOAUvLEo3puUc1m_O9P_w/exec";
 
   try {
     const response = await fetch(SHEETS_WEBAPP_URL, {
